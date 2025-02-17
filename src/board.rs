@@ -1,19 +1,13 @@
 use std::fmt;
-
 use crate::constants::PlayerState;
 use crate::constants::GuessError;
 use crate::constants::GameplayError;
-use crate::constants::GameState;
 use crate::probability::calc_pdf_and_guess;
 use crate::ship::Ship;
 use rand::{seq::IteratorRandom, Rng, thread_rng};
-
 use crate::constants::GuessResult;
-
 use crate::constants::Cell;
-
 use crate::fleet::Fleet;
-
 use std::collections::HashSet;
 use crate::constants::GRID_SIZE;
 
@@ -292,11 +286,10 @@ impl Board {
         }
     }
 
-    pub fn share(&self) {
-        let hits = self.hit_coords(true, true);
-        let misses = self.miss_coords();
-
-    }
+    // pub fn share(&self) {
+    //     let hits = self.hit_coords(true, true);
+    //     let misses = self.miss_coords();
+    // }
 
     pub fn get_ships(&self, unsunk:bool, sunk: bool) -> impl Iterator<Item = &Ship> {
         self.fleet.get_ships(unsunk, sunk)

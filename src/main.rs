@@ -8,7 +8,6 @@ use constants::GRID_SIZE;
 
 use crate::constants::PlayerState;
 use crate::board::Board;
-use crate::probability::calc_pdf_and_guess;
 
 pub trait GameInterface {
     /// Get the next move (i.e. the coordinate to attack)
@@ -37,11 +36,11 @@ fn main() {
             break;
         }
         match opponent_board.educated_guess() {
-            Ok(guess_result) => (),//println!("Player attacked opponent: {}", guess_result), 
+            Ok(_guess_result) => (),//println!("Player attacked opponent: {}", guess_result), 
             Err(e) => println!("Guess Error: {:?}", e)
         }
         match player_board.educated_guess() {
-            Ok(guess_result) => (),//println!("Opponent attacked player: {}", guess_result), 
+            Ok(_guess_result) => (),//println!("Opponent attacked player: {}", guess_result), 
             Err(e) => println!("Guess Error: {:?}", e)
         }
         turn += 1;

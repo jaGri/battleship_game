@@ -1,10 +1,7 @@
 use crate::board::Board;
 use crate::constants::GRID_SIZE;
-use itertools::Itertools;
-
 use rand::Rng;
-
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fmt::Display;
 
 /// Calculates and displays a 2D array in a formatted way.

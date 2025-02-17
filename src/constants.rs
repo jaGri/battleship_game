@@ -62,22 +62,6 @@ pub enum GameplayError {
     NoValidCoordinates,
 }
 
-
-/// Represents the current state of the game
-#[derive(Debug, PartialEq)]
-pub enum GameState {
-    /// Players are placing ships
-    Setup,
-    /// Player's turn to make a guess
-    PlayerTurn,
-    /// Opponent's turn to make a guess
-    OpponentTurn,
-    /// Player has won the game
-    PlayerWon,
-    /// Opponent has won the game
-    OpponentWon,
-}
-
 /// Represents the state of a player
 #[derive(Debug, PartialEq)]
 pub enum PlayerState {
@@ -96,14 +80,14 @@ pub enum Cell {
     Empty,
     /// Contains a ship
     Ship,
-    /// Preview of ship placement
-    ShipPrev,
+    // Preview of ship placement
+    //ShipPrev,
     /// Hit on a ship
     Hit,
     /// Missed shot
     Miss,
-    /// Cursor position
-    Cursor,
+    // Cursor position
+    //Cursor,
 }
 
 impl Cell {
@@ -115,10 +99,10 @@ impl Cell {
         match self {
             Cell::Empty => '.',
             Cell::Ship => '■',
-            Cell::ShipPrev => '☐',
+            //Cell::ShipPrev => '☐',
             Cell::Hit => 'X',
             Cell::Miss => 'O',
-            Cell::Cursor => '⌖',
+            //Cell::Cursor => '⌖',
         }
     }
 }
