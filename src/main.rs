@@ -9,7 +9,18 @@ use constants::GRID_SIZE;
 use crate::constants::PlayerState;
 use crate::board::Board;
 use crate::probability::calc_pdf_and_guess;
- 
+
+pub trait GameInterface {
+    /// Get the next move (i.e. the coordinate to attack)
+    fn get_move(&self, board: &Board) -> (usize, usize);
+    
+    /// Display the current board state to the user.
+    fn display_board(&self, board: &Board);
+    
+    /// Optionally, provide feedback after each move.
+    fn display_message(&self, message: &str);
+}
+
 fn main() {
     let mut player_board = Board::new();
     let mut opponent_board = Board::new();
