@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 async-trait = "0.1"
-battleship-core = { path = "../battleship-core" }
+battleship-common = { path = "../battleship-common" }
 
 [dev-dependencies]
 

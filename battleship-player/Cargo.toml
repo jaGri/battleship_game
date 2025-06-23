@@ -8,6 +8,7 @@ async-trait = "0.1"
 battleship-core = { path = "../battleship-core" }
 battleship-interface = { path = "../battleship-interface" }
 battleship-transport = { path = "../battleship-transport" }
+battleship-common = { path = "../battleship-common" }
 rand = "0.8"
 rayon = "1"
 

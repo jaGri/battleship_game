@@ -1,4 +1,4 @@
-use battleship_core::Board;
+use battleship_common::BoardView;
 use crate::GameInterface;
 
 /// Stub implementation of a user interface for embedded targets.
@@ -8,11 +8,11 @@ use crate::GameInterface;
 pub struct EmbeddedInterface;
 
 impl GameInterface for EmbeddedInterface {
-    fn get_move(&self, _board: &Board) -> (usize, usize) {
+    fn get_move(&self, _board: &dyn BoardView) -> (usize, usize) {
         (0, 0) // Replace with embedded-specific logic.
     }
 
-    fn display_board(&self, _board: &Board) {
+    fn display_board(&self, _board: &dyn BoardView) {
         // Embedded display logic.
     }
 

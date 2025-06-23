@@ -1,4 +1,4 @@
-use battleship_core::Board;
+use battleship_common::BoardView;
 use crate::GameInterface;
 use std::io::{self, Write};
 
@@ -9,7 +9,7 @@ use std::io::{self, Write};
 pub struct CLIInterface;
 
 impl GameInterface for CLIInterface {
-    fn get_move(&self, _board: &Board) -> (usize, usize) {
+    fn get_move(&self, board: &dyn BoardView) -> (usize, usize) {
         print!("Enter your move (e.g., A5): ");
         io::stdout().flush().unwrap();
         let mut input = String::new();
@@ -21,14 +21,15 @@ impl GameInterface for CLIInterface {
         let row_char = input.chars().next().unwrap();
         let row = row_char as usize - b'A' as usize;
         let col = input[1..].parse::<usize>().unwrap_or(1);
-        if row >= battleship_core::constants::GRID_SIZE || col == 0 || col > battleship_core::constants::GRID_SIZE {
+        let size = board.grid_size();
+        if row >= size || col == 0 || col > size {
             (0, 0)
         } else {
             (row, col - 1)
         }
     }
 
-    fn display_board(&self, board: &Board) {
+    fn display_board(&self, board: &dyn BoardView) {
         println!("{}", board);
     }
 
@@ -38,7 +39,7 @@ impl GameInterface for CLIInterface {
 }
 
 impl CLIInterface {
-    pub fn get_move_with_default(&self, _board: &Board, default: (usize, usize)) -> (usize, usize) {
+    pub fn get_move_with_default(&self, board: &dyn BoardView, default: (usize, usize)) -> (usize, usize) {
         let row_char = (b'A' + default.0 as u8) as char;
         let col = default.1 + 1;
         print!("Enter your move (e.g., {}{}): ", row_char, col);
@@ -55,7 +56,8 @@ impl CLIInterface {
         let row_char = input.chars().next().unwrap();
         let row = row_char as usize - b'A' as usize;
         let col = input[1..].parse::<usize>().unwrap_or(1);
-        if row >= battleship_core::constants::GRID_SIZE || col == 0 || col > battleship_core::constants::GRID_SIZE {
+        let size = board.grid_size();
+        if row >= size || col == 0 || col > size {
             (0, 0)
         } else {
             (row, col - 1)
