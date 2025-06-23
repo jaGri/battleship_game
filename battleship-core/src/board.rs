@@ -382,3 +382,9 @@ impl fmt::Display for Board {
     }
 }
 
+impl battleship_common::BoardView for Board {
+    fn grid_size(&self) -> usize {
+        self.gridsize
+    }
+}
+

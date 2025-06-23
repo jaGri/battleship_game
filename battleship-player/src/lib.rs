@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use battleship_common::BoardView;
 use battleship_core::{Board, GuessResult};
 use battleship_interface::GameInterface;
 use battleship_transport::Transport;
@@ -8,8 +9,8 @@ pub mod probability;
 
 /// Core player trait used by the game engine.
 #[async_trait]
-pub trait Player {
-    async fn next_move(&mut self, board: &Board) -> (usize, usize);
+pub trait Player<B: BoardView + Sync> {
+    async fn next_move(&mut self, board: &B) -> (usize, usize);
     async fn on_move_result(&mut self, result: GuessResult);
 }
 
@@ -23,8 +24,12 @@ impl<I: GameInterface> HumanPlayer<I> {
 }
 
 #[async_trait]
-impl<I: GameInterface + Send> Player for HumanPlayer<I> {
-    async fn next_move(&mut self, board: &Board) -> (usize, usize) {
+impl<I, B> Player<B> for HumanPlayer<I>
+where
+    I: GameInterface + Send,
+    B: BoardView + Sync,
+{
+    async fn next_move(&mut self, board: &B) -> (usize, usize) {
         self.interface.get_move(board)
     }
 
@@ -37,7 +42,7 @@ impl<I: GameInterface + Send> Player for HumanPlayer<I> {
 pub struct AIPlayer;
 
 #[async_trait]
-impl Player for AIPlayer {
+impl Player<Board> for AIPlayer {
     async fn next_move(&mut self, board: &Board) -> (usize, usize) {
         probability::calc_pdf_and_guess(board)
     }
@@ -56,12 +61,13 @@ impl<I: GameInterface, T: Transport> RemotePlayer<I, T> {
 }
 
 #[async_trait]
-impl<I, T> Player for RemotePlayer<I, T>
+impl<I, T, B> Player<B> for RemotePlayer<I, T>
 where
     I: GameInterface + Send,
     T: Transport + Send,
+    B: BoardView + Sync,
 {
-    async fn next_move(&mut self, board: &Board) -> (usize, usize) {
+    async fn next_move(&mut self, board: &B) -> (usize, usize) {
         self.iface.get_move(board)
     }
 

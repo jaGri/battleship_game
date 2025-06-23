@@ -1,4 +1,4 @@
-use battleship_core::Board;
+use battleship_common::BoardView;
 
 /// Abstraction over user interaction for the Battleship game.
 ///
@@ -10,10 +10,10 @@ pub trait GameInterface {
     ///
     /// The implementation is responsible for validating and parsing
     /// any user input into board coordinates.
-    fn get_move(&self, board: &Board) -> (usize, usize);
+    fn get_move(&self, board: &dyn BoardView) -> (usize, usize);
 
     /// Render the current state of the provided board to the user.
-    fn display_board(&self, board: &Board);
+    fn display_board(&self, board: &dyn BoardView);
 
     /// Show an informational message to the player.
     fn display_message(&self, message: &str);
