@@ -1,4 +1,4 @@
-use crate::board::Board;
+use battleship_core::Board;
 
 /// Abstraction over user interaction for the Battleship game.
 ///
@@ -18,3 +18,7 @@ pub trait GameInterface {
     /// Show an informational message to the player.
     fn display_message(&self, message: &str);
 }
+
+pub mod cli;
+pub mod embedded;
+

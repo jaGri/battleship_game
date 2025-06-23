@@ -1,0 +1,12 @@
+[package]
+name = "battleship-player"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-trait = "0.1"
+battleship-core = { path = "../battleship-core" }
+battleship-interface = { path = "../battleship-interface" }
+battleship-transport = { path = "../battleship-transport" }
+rand = "0.8"
+

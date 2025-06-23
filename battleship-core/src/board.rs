@@ -2,7 +2,6 @@ use std::fmt;
 use crate::constants::PlayerState;
 use crate::constants::GuessError;
 use crate::constants::GameplayError;
-use crate::probability::calc_pdf_and_guess;
 use crate::ship::Ship;
 use rand::{seq::IteratorRandom, Rng, thread_rng};
 use crate::constants::GuessResult;
@@ -262,18 +261,6 @@ impl Board {
             Some(guess) => self.guess(*guess),
             None => Err(GuessError::RandomGuessFailed)
         }
-    }
-
-    /// Makes an educated guess using probability density calculation.
-    ///
-    /// This method uses the probability.rs module to calculate the most likely
-    /// locations of ships based on current board state and makes an intelligent guess.
-    ///
-    /// # Returns
-    /// * `Result<GuessResult, GuessError>` - Result of the guess or error if invalid
-    pub fn educated_guess(&mut self) -> Result<GuessResult, GuessError> {
-        let guess = calc_pdf_and_guess(&self);
-        self.guess(guess)
     }
 
     /// Gets the current state of the player (Setup, Alive, or Dead).

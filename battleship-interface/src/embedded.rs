@@ -1,5 +1,5 @@
-use crate::board::Board;
-use crate::interface::GameInterface;
+use battleship_core::Board;
+use crate::GameInterface;
 
 /// Stub implementation of a user interface for embedded targets.
 ///
@@ -20,3 +20,4 @@ impl GameInterface for EmbeddedInterface {
         // Embedded message handling.
     }
 }
+

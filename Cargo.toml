@@ -1,13 +1,16 @@
-[package]
-name = "battleship"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-crossterm = "0.21.0"
-rand = "0.8.4"
-array-init = "2.0"
-itertools = "0.10"
-
-[dev-dependencies]
-assert_approx_eq = "1.1.0"
+[workspace]
+members = [
+    "battleship-core",
+    "battleship-interface",
+    "battleship-transport",
+    "battleship-player",
+    "battleship-common",
+    "battleship-config",
+    "battleship-save",
+    "battleship-audio",
+    "battleship-metrics",
+    "battleship-sim",
+    "battleship-cli",
+    "battleship-embedded",
+]
+resolver = "2"

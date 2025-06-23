@@ -1,5 +1,5 @@
-use crate::board::Board;
-use crate::interface::GameInterface;
+use battleship_core::Board;
+use crate::GameInterface;
 use std::io::{self, Write};
 
 /// Simple command line user interface implementation.
@@ -28,3 +28,4 @@ impl GameInterface for CLIInterface {
         println!("{}", message);
     }
 }
+
