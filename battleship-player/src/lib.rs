@@ -5,7 +5,7 @@ use battleship_interface::GameInterface;
 use battleship_transport::Transport;
 
 pub mod probability;
-//pub mod posterior;
+pub mod posterior;
 
 /// Core player trait used by the game engine.
 #[async_trait]

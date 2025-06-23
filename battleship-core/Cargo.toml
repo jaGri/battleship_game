@@ -8,6 +8,7 @@ edition = "2021"
 rand = "0.8"
 array-init = "2.0"
 battleship-common = { path = "../battleship-common" }
+battleship-config = { path = "../battleship-config" }
 
 [dev-dependencies]
 assert_approx_eq = "1.1.0"

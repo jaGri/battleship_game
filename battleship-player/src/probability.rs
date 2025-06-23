@@ -1,4 +1,5 @@
-use battleship_core::{Board, constants::GRID_SIZE};
+use battleship_config::GRID_SIZE;
+use battleship_core::Board;
 use rand::Rng;
 use std::collections::HashSet;
 use std::fmt::Display;
@@ -159,10 +160,7 @@ fn normalize_pdf(matrix: &[[f64; GRID_SIZE]; GRID_SIZE]) -> [[f64; GRID_SIZE]; G
 ///
 /// # Returns
 /// * `(usize, usize)` - Selected coordinate
-fn sample_pdf(
-    pdf: &[[f64; GRID_SIZE]; GRID_SIZE],
-    temperature: f64,
-) -> (usize, usize) {
+fn sample_pdf(pdf: &[[f64; GRID_SIZE]; GRID_SIZE], temperature: f64) -> (usize, usize) {
     // Create an adjusted matrix by applying a Boltzmann factor: p'(x) = p(x)^(1/temperature)
     let mut adjusted_matrix = [[0.0; GRID_SIZE]; GRID_SIZE];
     let mut total = 0.0;
