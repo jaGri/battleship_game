@@ -9,3 +9,4 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 battleship_core = { path = "../core" }
 rand = "0.8"
+async-trait = "0.1"

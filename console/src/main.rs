@@ -1,8 +1,9 @@
 //! Console app.
 
 use clap::Parser;
-use battleship_core::{run_game, Player, Renderer};
-use battleship_console::ui::{ConsoleInput, ConsoleRenderer};
+use battleship_core::{run_game, Player};
+mod ui;
+use ui::{ConsoleInput, ConsoleRenderer};
 use battleship_ai::{AiPlayer, Difficulty};
 use std::process;
 
