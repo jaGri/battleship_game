@@ -2,11 +2,18 @@ use crate::board::Board;
 use crate::interface::GameInterface;
 use crate::constants::PlayerState;
 
+/// Available game modes.
 pub enum GameMode {
+    /// Human vs computer.
     SinglePlayer,
+    /// Two human players taking turns.
     Multiplayer,
 }
 
+/// Run a complete game using the provided user interface implementation.
+///
+/// The game loop handles alternating turns, displaying boards and
+/// checking for win conditions until one side has no ships remaining.
 pub fn run_game<T: GameInterface>(ui: T, mode: GameMode) {
     let mut player_board = Board::new();
     let mut opponent_board = Board::new();

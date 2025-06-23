@@ -1,6 +1,10 @@
 use crate::board::Board;
 use crate::interface::GameInterface;
 
+/// Stub implementation of a user interface for embedded targets.
+///
+/// In a real embedded environment this would interface with
+/// hardware such as buttons and displays.
 pub struct EmbeddedInterface;
 
 impl GameInterface for EmbeddedInterface {
