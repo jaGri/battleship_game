@@ -4,7 +4,7 @@ use crate::constants::GameplayError;
 use crate::constants::GuessError;
 use crate::constants::GuessResult;
 
-use crate::constants::SHIPS;
+use battleship_config::SHIPS;
 
 use crate::constants::GameplayError::ShipNotFound;
 use crate::constants::GuessResult::{Hit, Miss, Sunk};
