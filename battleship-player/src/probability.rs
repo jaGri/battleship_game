@@ -2,7 +2,6 @@ use battleship_core::{Board, constants::GRID_SIZE};
 use rand::Rng;
 use std::collections::HashSet;
 use std::fmt::Display;
-use crate::posterior::Posterior;
 
 /// Calculates and displays a 2D array in a formatted way.
 /// Useful for debugging and visualizing probability distributions.
@@ -77,14 +76,52 @@ fn elem_as_f64<T: Display>(elem: &T) -> Option<f64> {
 /// # Returns
 /// * `[[f64; GRID_SIZE]; GRID_SIZE]` - 2D array of probabilities
 fn calc_pdf(board: &Board) -> [[f64; GRID_SIZE]; GRID_SIZE] {
-    let mut misses: HashSet<(usize, usize)> = board.miss_coords();
-    misses.extend(board.hit_coords(false, true));
-    let hits: Vec<(usize, usize)> = board.hit_coords(true, false).into_iter().collect();
-    let miss_vec: Vec<(usize, usize)> = misses.into_iter().collect();
-    let lengths: Vec<usize> = board.ship_lengths_remaining();
+    let unguessed_coords = board.unguessed();
+    let unsunk_hit_coords: HashSet<(usize, usize)> = board.hit_coords(true, false);
+    let misses_and_sunk_coords: HashSet<(usize, usize)> = board
+        .guessed()
+        .difference(&unsunk_hit_coords)
+        .cloned()
+        .collect();
+    let unsunk_ship_lengths: Vec<usize> = board.ship_lengths_remaining();
 
-    let posterior = Posterior::new(&miss_vec, &hits, &lengths);
-    posterior.compute()
+    let mut prob_matrix = [[0.0; GRID_SIZE]; GRID_SIZE];
+
+    const L_HIT: f64 = 5.0;
+    const L_NO_HIT: f64 = 0.2;
+
+    for ship_length in unsunk_ship_lengths {
+        for i in 0..GRID_SIZE {
+            for j in 0..GRID_SIZE {
+                let start_coord = (i, j);
+                for &horizontal in &[true, false] {
+                    let placement = board.calc_placement(start_coord, ship_length, horizontal);
+                    if !board.valid_placement(&placement, &misses_and_sunk_coords) {
+                        continue;
+                    }
+
+                    let n_hits = unsunk_hit_coords.intersection(&placement).count();
+                    let likelihood = if !unsunk_hit_coords.is_empty() {
+                        if n_hits > 0 {
+                            L_HIT.powi(n_hits as i32)
+                        } else {
+                            L_NO_HIT
+                        }
+                    } else {
+                        1.0
+                    };
+
+                    for coord in &placement {
+                        if unguessed_coords.contains(coord) {
+                            prob_matrix[coord.0][coord.1] += likelihood;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    normalize_pdf(&prob_matrix)
 }
 
 /// Normalizes a probability density function matrix so all values sum to 1.
