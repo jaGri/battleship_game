@@ -11,4 +11,5 @@ battleship-transport = { path = "../battleship-transport" }
 battleship-common = { path = "../battleship-common" }
 rand = "0.8"
 rayon = "1"
+battleship-config = { path = "../battleship-config" }
 

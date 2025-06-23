@@ -1,10 +1,11 @@
 pub mod board;
+pub mod constants;
 pub mod fleet;
 pub mod ship;
-pub mod constants;
 
-pub use board::Board;
 pub use battleship_common::BoardView;
+pub use battleship_config::{GRID_SIZE, SHIPS};
+pub use board::Board;
+pub use constants::{Cell, GameplayError, GuessError, GuessResult, PlayerState};
 pub use fleet::Fleet;
 pub use ship::Ship;
-pub use constants::{GRID_SIZE, PlayerState, GuessResult, GuessError, GameplayError, Cell};

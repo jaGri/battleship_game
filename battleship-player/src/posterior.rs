@@ -18,7 +18,7 @@
 
 use rayon::prelude::*;
 use std::collections::HashMap;
-use battleship_core::GRID_SIZE;
+use battleship_config::GRID_SIZE;
 type Mask = u128;  // 100 bits → 10×10 grid
 
 /// Packs a list of (row, col) coordinates into a single `Mask`,
