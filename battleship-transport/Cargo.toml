@@ -9,4 +9,5 @@ async-trait = "0.1"
 battleship-core = { path = "../battleship-core" }
 
 [dev-dependencies]
+futures = "0.3"
 
