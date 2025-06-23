@@ -2,18 +2,6 @@
 
 use std::fmt;
 
-/// Size of the game grid (10x10 is standard)
-pub const GRID_SIZE: usize = 10;
-
-/// Standard ship configurations with their names and lengths
-pub const SHIPS: &[(&str, usize)] = &[
-    ("Carrier",     5),
-    ("Battleship",  4),
-    ("Cruiser",     3),
-    ("Submarine",   3),
-    ("Destroyer",   2),
-];
-
 /// Represents the result of a guess attempt
 #[derive(Debug, PartialEq)]
 pub enum GuessResult {
@@ -25,13 +13,12 @@ pub enum GuessResult {
     Sunk(&'static str),
 }
 
-
 impl fmt::Display for GuessResult {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             GuessResult::Miss => write!(f, "Miss"),
             GuessResult::Hit => write!(f, "Hit"),
-            GuessResult::Sunk(s) => write!(f, "The {} was sunk!", s)
+            GuessResult::Sunk(s) => write!(f, "The {} was sunk!", s),
         }
     }
 }
@@ -46,7 +33,7 @@ pub enum GuessError {
     /// No valid coordinates remain
     NoValidCoordinates,
     /// Random guess generation failed
-    RandomGuessFailed
+    RandomGuessFailed,
 }
 
 /// Represents possible errors during gameplay
@@ -70,7 +57,7 @@ pub enum PlayerState {
     /// Player has ships remaining
     Alive,
     /// All player's ships have been sunk
-    Dead
+    Dead,
 }
 
 /// Represents different cell states on the game board
