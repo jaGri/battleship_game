@@ -1,15 +1,14 @@
-use std::fmt;
-use crate::constants::PlayerState;
-use crate::constants::GuessError;
-use crate::constants::GameplayError;
-use crate::ship::Ship;
-use rand::{seq::IteratorRandom, Rng, thread_rng};
-use crate::constants::GuessResult;
 use crate::constants::Cell;
-use crate::fleet::Fleet;
-use std::collections::HashSet;
+use crate::constants::GameplayError;
+use crate::constants::GuessError;
+use crate::constants::GuessResult;
+use crate::constants::PlayerState;
 use crate::constants::GRID_SIZE;
-
+use crate::fleet::Fleet;
+use crate::ship::Ship;
+use rand::{seq::IteratorRandom, thread_rng, Rng};
+use std::collections::HashSet;
+use std::fmt;
 
 // Represents the game board for Battleship, managing ship placement, guessing,
 // and game state tracking.
@@ -42,7 +41,6 @@ pub struct Board {
 //     /// Current state of the player (Setup, Alive, or Dead)
 //     state: PlayerState
 // }
-
 
 // impl BoardState {
 //     pub fn new(board: &Board, incl_ships:bool) -> Self {
@@ -79,7 +77,7 @@ impl Board {
             gridsize: GRID_SIZE,
             fleet: Fleet::new(),
             coordinates: coordinates,
-            guessed: HashSet::with_capacity(GRID_SIZE*GRID_SIZE),
+            guessed: HashSet::with_capacity(GRID_SIZE * GRID_SIZE),
         }
     }
 
@@ -87,7 +85,7 @@ impl Board {
     ///
     /// # Returns
     /// * `&HashSet<(usize,usize)>` - Reference to the set of guessed coordinates
-    pub fn guessed(&self) -> &HashSet<(usize,usize)> {
+    pub fn guessed(&self) -> &HashSet<(usize, usize)> {
         &self.guessed
     }
 
@@ -95,7 +93,7 @@ impl Board {
     ///
     /// # Returns
     /// * `HashSet<(usize,usize)>` - Set of unguessed coordinates
-    pub fn unguessed(&self) -> HashSet<(usize,usize)> {
+    pub fn unguessed(&self) -> HashSet<(usize, usize)> {
         self.coordinates
             .difference(&self.guessed)
             .cloned()
@@ -110,7 +108,7 @@ impl Board {
     ///
     /// # Returns
     /// * `HashSet<(usize,usize)>` - Set of hit coordinates matching the criteria
-    pub fn hit_coords(&self, unsunk:bool, sunk: bool) -> HashSet<(usize,usize)> {
+    pub fn hit_coords(&self, unsunk: bool, sunk: bool) -> HashSet<(usize, usize)> {
         self.fleet.hit_coords(unsunk, sunk)
     }
 
@@ -118,11 +116,14 @@ impl Board {
     ///
     /// # Returns
     /// * `HashSet<(usize,usize)>` - Set of coordinates where shots missed
-    pub fn miss_coords(&self) -> HashSet<(usize,usize)> {
-        self.guessed.difference(&self.hit_coords(true, true)).cloned().collect()
+    pub fn miss_coords(&self) -> HashSet<(usize, usize)> {
+        self.guessed
+            .difference(&self.hit_coords(true, true))
+            .cloned()
+            .collect()
     }
 
-    fn ship_coords(&self, unsunk:bool, sunk:bool) -> HashSet<(usize,usize)> {
+    fn ship_coords(&self, unsunk: bool, sunk: bool) -> HashSet<(usize, usize)> {
         self.fleet.ship_coords(unsunk, sunk)
     }
 
@@ -136,7 +137,12 @@ impl Board {
     ///
     /// # Returns
     /// * `HashSet<(usize,usize)>` - Set of coordinates the ship would occupy
-    pub fn calc_placement(&self, start: (usize,usize), length: usize, horizontal: bool) -> HashSet<(usize,usize)> {
+    pub fn calc_placement(
+        &self,
+        start: (usize, usize),
+        length: usize,
+        horizontal: bool,
+    ) -> HashSet<(usize, usize)> {
         (0..length)
             .map(|i| {
                 if horizontal {
@@ -145,7 +151,7 @@ impl Board {
                     (start.0 + i, start.1)
                 }
             })
-        .collect()
+            .collect()
     }
 
     /// Validates whether a ship placement is legal.
@@ -156,7 +162,11 @@ impl Board {
     ///
     /// # Returns
     /// * `bool` - True if placement is valid, false otherwise
-    pub fn valid_placement(&self, coords: &HashSet<(usize, usize)>, invalid_coords: &HashSet<(usize, usize)>) -> bool {
+    pub fn valid_placement(
+        &self,
+        coords: &HashSet<(usize, usize)>,
+        invalid_coords: &HashSet<(usize, usize)>,
+    ) -> bool {
         coords.is_subset(&self.coordinates) && coords.is_disjoint(&invalid_coords)
     }
 
@@ -177,7 +187,12 @@ impl Board {
     /// let result = board.place_ship("Carrier", (0, 0), true);
     /// assert!(result.is_ok());
     /// ```
-    pub fn place_ship(&mut self, name: &str, start: (usize, usize), horizontal: bool) -> Result<(), GameplayError> {
+    pub fn place_ship(
+        &mut self,
+        name: &str,
+        start: (usize, usize),
+        horizontal: bool,
+    ) -> Result<(), GameplayError> {
         let existing_ships: HashSet<(usize, usize)> = self.ship_coords(true, true);
         let length = match self.fleet.get_ship(name) {
             Ok(ship) => ship.length(),
@@ -190,10 +205,10 @@ impl Board {
         self.fleet.place_ship(name, proposed)
     }
 
-
     pub fn randomly_place_ship(&mut self, name: &str) -> Result<(), GameplayError> {
         let mut rng = thread_rng();
-        for _ in 0..GRID_SIZE*GRID_SIZE*1000 { // Prevent infinite loop
+        for _ in 0..GRID_SIZE * GRID_SIZE * 1000 {
+            // Prevent infinite loop
             if let Some(start) = self.coordinates.iter().choose(&mut rng) {
                 let horizontal = rng.gen_bool(0.5);
                 if self.place_ship(name, *start, horizontal).is_ok() {
@@ -206,14 +221,16 @@ impl Board {
 
     pub fn randomly_place_fleet(&mut self) -> Result<(), GameplayError> {
         // Collect the names of the unplaced ships into a vector
-        let unplaced_ships: Vec<String> = self.fleet.unplaced_ships()
+        let unplaced_ships: Vec<String> = self
+            .fleet
+            .unplaced_ships()
             .map(|ship| ship.name().to_string())
             .collect();
         // Now place each ship
         for ship_name in unplaced_ships {
             match self.randomly_place_ship(&ship_name) {
                 Ok(_) => continue,
-                Err(e) => return Err(e)
+                Err(e) => return Err(e),
             }
         }
         Ok(())
@@ -245,7 +262,7 @@ impl Board {
         }
         self.fleet.guess(target)
     }
-    
+
     fn is_valid_target(&self, target: (usize, usize)) -> bool {
         self.coordinates.contains(&target)
     }
@@ -254,12 +271,12 @@ impl Board {
     pub fn random_guess(&mut self) -> Result<GuessResult, GuessError> {
         let mut rng = thread_rng();
         let unguessed = self.unguessed();
-        if unguessed.len()==0 {
+        if unguessed.len() == 0 {
             return Err(GuessError::NoValidCoordinates);
         }
         match unguessed.iter().choose(&mut rng) {
             Some(guess) => self.guess(*guess),
-            None => Err(GuessError::RandomGuessFailed)
+            None => Err(GuessError::RandomGuessFailed),
         }
     }
 
@@ -282,16 +299,33 @@ impl Board {
     //     let misses = self.miss_coords();
     // }
 
-    pub fn get_ships(&self, unsunk:bool, sunk: bool) -> impl Iterator<Item = &Ship> {
+    pub fn get_ships(&self, unsunk: bool, sunk: bool) -> impl Iterator<Item = &Ship> {
         self.fleet.get_ships(unsunk, sunk)
     }
 
     pub fn hits_remaining(&self) -> usize {
-        self.fleet.hits_remaining() 
+        self.fleet.hits_remaining()
     }
 
     pub fn ship_lengths_remaining(&self) -> Vec<usize> {
         self.get_ships(true, false).map(|s| s.length()).collect()
+    }
+
+    /// Returns status information for each ship on the board.
+    pub fn ship_statuses(&self) -> Vec<(&'static str, usize, bool)> {
+        self.fleet.ship_statuses()
+    }
+
+    /// Formats ship status into a human readable string.
+    pub fn format_ship_status(&self) -> String {
+        self.ship_statuses()
+            .into_iter()
+            .map(|(name, len, sunk)| {
+                let icon = if sunk { "☒" } else { "☐" };
+                format!("{}({}):{}", name, len, icon)
+            })
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 
     pub fn unguessed_iter(&self) -> impl Iterator<Item = &(usize, usize)> {
@@ -373,7 +407,6 @@ impl Board {
     //         println!();
     //     }
     // }
-    
 }
 
 impl fmt::Display for Board {
@@ -387,4 +420,3 @@ impl battleship_common::BoardView for Board {
         self.gridsize
     }
 }
-

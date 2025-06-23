@@ -1,4 +1,4 @@
-use battleship_core::{Board, constants::PlayerState};
+use battleship_core::{constants::PlayerState, Board};
 use battleship_interface::{cli::CLIInterface, GameInterface};
 use battleship_player::probability;
 
@@ -17,8 +17,10 @@ fn run_game(ui: CLIInterface) {
     loop {
         ui.display_message("Opponent board:");
         ui.display_message(&ai_board.format_board(false));
+        ui.display_message(&ai_board.format_ship_status());
         ui.display_message("Your board:");
         ui.display_message(&player_board.format_board(true));
+        ui.display_message(&player_board.format_ship_status());
         ui.display_message("Your turn:");
         let suggestion = probability::calc_pdf_and_guess(&ai_board);
         let coord = ui.get_move_with_default(&ai_board, suggestion);
@@ -51,7 +53,8 @@ fn run_game(ui: CLIInterface) {
     ui.display_message("Final boards:");
     ui.display_message("AI board:");
     ui.display_message(&ai_board.format_board(true));
+    ui.display_message(&ai_board.format_ship_status());
     ui.display_message("Player board:");
     ui.display_message(&player_board.format_board(true));
+    ui.display_message(&player_board.format_ship_status());
 }
-
