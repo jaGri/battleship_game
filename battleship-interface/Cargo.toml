@@ -1,0 +1,11 @@
+[package]
+name = "battleship-interface"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-trait = "0.1"
+battleship-core = { path = "../battleship-core" }
+
+[dev-dependencies]
+

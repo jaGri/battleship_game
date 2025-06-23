@@ -1,5 +1,4 @@
-use crate::board::Board;
-use crate::constants::GRID_SIZE;
+use battleship_core::{Board, constants::GRID_SIZE};
 use rand::Rng;
 use std::collections::HashSet;
 use std::fmt::Display;

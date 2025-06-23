@@ -1,0 +1,15 @@
+[package]
+name = "battleship-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-trait = "0.1"
+battleship-core = { path = "../battleship-core" }
+battleship-interface = { path = "../battleship-interface" }
+battleship-player = { path = "../battleship-player" }
+
+[[bin]]
+name = "battleship-cli"
+path = "src/main.rs"
+
