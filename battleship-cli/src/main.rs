@@ -7,7 +7,7 @@ fn main() {
     run_game(ui);
 }
 
-fn run_game<I: GameInterface>(ui: I) {
+fn run_game(ui: CLIInterface) {
     let mut player_board = Board::new();
     let mut ai_board = Board::new();
 
@@ -20,7 +20,8 @@ fn run_game<I: GameInterface>(ui: I) {
         ui.display_message("Your board:");
         ui.display_message(&player_board.format_board(true));
         ui.display_message("Your turn:");
-        let coord = ui.get_move(&player_board);
+        let suggestion = probability::calc_pdf_and_guess(&ai_board);
+        let coord = ui.get_move_with_default(&ai_board, suggestion);
 
         match ai_board.guess(coord) {
             Ok(result) => ui.display_message(&format!("You: {}", result)),
