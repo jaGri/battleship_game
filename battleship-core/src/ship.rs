@@ -1,8 +1,8 @@
-use std::collections::HashSet;
-use crate::constants::GuessResult;
-use crate::constants::GuessError;
 use crate::constants::GameplayError;
 use crate::constants::GameplayError::InvalidPlacement;
+use crate::constants::GuessError;
+use crate::constants::GuessResult;
+use std::collections::HashSet;
 
 /// Represents a single ship in the Battleship game.
 ///
@@ -19,9 +19,8 @@ pub struct Ship {
     /// Whether the ship has been placed on the board
     placed: bool,
     /// Whether the ship has been sunk
-    sunk: bool
+    sunk: bool,
 }
-
 
 impl Ship {
     /// Creates a new ship instance.
@@ -46,8 +45,8 @@ impl Ship {
             length,
             coords: HashSet::with_capacity(length),
             hits: HashSet::with_capacity(length),
-            placed: false, 
-            sunk: false
+            placed: false,
+            sunk: false,
         }
     }
 
@@ -61,7 +60,7 @@ impl Ship {
     ///
     /// # Errors
     /// Returns `InvalidPlacement` if the number of coordinates doesn't match ship length
-    pub fn place(&mut self, coords: HashSet<(usize,usize)>) -> Result<(), GameplayError> {
+    pub fn place(&mut self, coords: HashSet<(usize, usize)>) -> Result<(), GameplayError> {
         if coords.len() != self.length {
             return Err(InvalidPlacement);
         }
@@ -69,7 +68,7 @@ impl Ship {
         self.placed = true;
         Ok(())
     }
-    
+
     /// Processes a guess against this ship.
     ///
     /// # Arguments
@@ -90,7 +89,7 @@ impl Ship {
     /// ```
     pub fn guess(&mut self, target: (usize, usize)) -> Result<GuessResult, GuessError> {
         if self.hits.contains(&target) {
-            return Err(GuessError::AlreadyGuessed)
+            return Err(GuessError::AlreadyGuessed);
         }
         if self.coords.contains(&target) {
             self.hits.insert(target);
@@ -105,7 +104,7 @@ impl Ship {
         }
     }
 
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'static str {
         self.name
     }
 
@@ -136,5 +135,4 @@ impl Ship {
     pub fn hits_remaining(&self) -> usize {
         self.coords.len() - self.hits.len()
     }
-
 }

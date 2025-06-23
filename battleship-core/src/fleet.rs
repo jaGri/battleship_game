@@ -1,13 +1,13 @@
 use std::collections::HashSet;
 
 use crate::constants::GameplayError;
-use crate::constants::GuessResult;
 use crate::constants::GuessError;
+use crate::constants::GuessResult;
 
 use crate::constants::SHIPS;
 
-use crate::constants::GuessResult::{Hit, Miss, Sunk};
 use crate::constants::GameplayError::ShipNotFound;
+use crate::constants::GuessResult::{Hit, Miss, Sunk};
 use crate::ship::Ship;
 
 use array_init::array_init;
@@ -18,7 +18,7 @@ use array_init::array_init;
 /// and maintaining the overall state of all ships in play.
 pub struct Fleet {
     /// Array of all ships in the fleet
-    ships: [Ship; SHIPS.len()]
+    ships: [Ship; SHIPS.len()],
 }
 
 impl Fleet {
@@ -34,7 +34,7 @@ impl Fleet {
             ships: array_init(|i: usize| {
                 let (name, length) = SHIPS[i];
                 Ship::new(name, length)
-            })
+            }),
         }
     }
 
@@ -48,7 +48,7 @@ impl Fleet {
     ///
     /// # Errors
     /// Returns `ShipNotFound` if no ship matches the given name
-    pub fn get_ship(&self, name:&str) -> Result<&Ship, GameplayError> {
+    pub fn get_ship(&self, name: &str) -> Result<&Ship, GameplayError> {
         self.ships
             .iter()
             .find(|ship| ship.name() == name)
@@ -65,7 +65,7 @@ impl Fleet {
     ///
     /// # Errors
     /// Returns `ShipNotFound` if no ship matches the given name
-    fn get_ship_mut(&mut self, name:&str) -> Result<&mut Ship, GameplayError> {
+    fn get_ship_mut(&mut self, name: &str) -> Result<&mut Ship, GameplayError> {
         self.ships
             .iter_mut()
             .find(|ship| ship.name() == name)
@@ -80,7 +80,7 @@ impl Fleet {
     ///
     /// # Returns
     /// * Iterator over ships matching the criteria
-    pub fn get_ships(&self, unsunk:bool, sunk:bool) -> impl Iterator<Item = &Ship> {
+    pub fn get_ships(&self, unsunk: bool, sunk: bool) -> impl Iterator<Item = &Ship> {
         self.ships
             .iter()
             .filter(move |ship| (unsunk && !ship.is_sunk()) || (sunk && ship.is_sunk()))
@@ -94,7 +94,11 @@ impl Fleet {
     ///
     /// # Returns
     /// * Iterator over tuples of (ship name, ship length) matching the criteria
-    pub fn get_ship_names_and_length(&self, unsunk:bool, sunk:bool) -> impl Iterator<Item = (&str, usize)> {
+    pub fn get_ship_names_and_length(
+        &self,
+        unsunk: bool,
+        sunk: bool,
+    ) -> impl Iterator<Item = (&str, usize)> {
         let ships = self.get_ships(unsunk, sunk);
         ships.map(|ship| (ship.name(), ship.length()))
     }
@@ -139,7 +143,11 @@ impl Fleet {
     ///
     /// # Returns
     /// * `Result<(), GameplayError>` - Ok if successful, Error if placement invalid
-    pub fn place_ship(&mut self, name: &str, coords: HashSet<(usize,usize)>) -> Result<(),GameplayError> {
+    pub fn place_ship(
+        &mut self,
+        name: &str,
+        coords: HashSet<(usize, usize)>,
+    ) -> Result<(), GameplayError> {
         let ship = self.get_ship_mut(name)?;
         ship.place(coords)
     }
@@ -152,7 +160,7 @@ impl Fleet {
     ///
     /// # Returns
     /// * `HashSet<(usize,usize)>` - Set of coordinates for matching ships
-    pub fn ship_coords(&self, unsunk:bool, sunk:bool) -> HashSet<(usize,usize)> {
+    pub fn ship_coords(&self, unsunk: bool, sunk: bool) -> HashSet<(usize, usize)> {
         self.get_ships(unsunk, sunk)
             .flat_map(|s: &Ship| s.coords().iter().cloned())
             .collect()
@@ -166,9 +174,9 @@ impl Fleet {
     ///
     /// # Returns
     /// * `HashSet<(usize,usize)>` - Set of hit coordinates for matching ships
-    pub fn hit_coords(&self, unsunk:bool, sunk:bool) -> HashSet<(usize,usize)> {
+    pub fn hit_coords(&self, unsunk: bool, sunk: bool) -> HashSet<(usize, usize)> {
         self.get_ships(unsunk, sunk)
-            .flat_map(|s: &Ship| s.hits().iter().cloned()) 
+            .flat_map(|s: &Ship| s.hits().iter().cloned())
             .collect()
     }
     /// Counts the number of ships based on their sunk status.
@@ -179,7 +187,7 @@ impl Fleet {
     ///
     /// # Returns
     /// * `usize` - Number of ships matching the criteria
-    pub fn n_ships(&self, unsunk:bool, sunk:bool) -> usize {
+    pub fn n_ships(&self, unsunk: bool, sunk: bool) -> usize {
         self.get_ships(unsunk, sunk).count()
     }
 
@@ -191,7 +199,7 @@ impl Fleet {
     ///
     /// # Returns
     /// * `usize` - Total number of coordinates occupied by matching ships
-    pub fn n_ship_coords(&self, unsunk:bool, sunk:bool) -> usize {
+    pub fn n_ship_coords(&self, unsunk: bool, sunk: bool) -> usize {
         self.get_ships(unsunk, sunk)
             .map(|s: &Ship| s.length())
             .sum()
@@ -205,7 +213,7 @@ impl Fleet {
     ///
     /// # Returns
     /// * `usize` - Total number of hits on matching ships
-    pub fn n_ship_hits(&self, unsunk:bool, sunk:bool) -> usize {
+    pub fn n_ship_hits(&self, unsunk: bool, sunk: bool) -> usize {
         self.get_ships(unsunk, sunk)
             .map(|s: &Ship| s.hits().len())
             .sum()
@@ -227,7 +235,13 @@ impl Fleet {
         let total_hits = self.total_hits();
         total_hits - self.n_ship_hits(true, true)
     }
-    
 
-
+    /// Returns the status for each ship as a tuple of name, length and whether
+    /// it has been sunk.
+    pub fn ship_statuses(&self) -> Vec<(&'static str, usize, bool)> {
+        self.ships
+            .iter()
+            .map(|s| (s.name(), s.length(), s.is_sunk()))
+            .collect()
+    }
 }
