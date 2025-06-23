@@ -1,13 +1,16 @@
-// src/cli_interface.rs
 use crate::board::Board;
 use crate::interface::GameInterface;
 use std::io::{self, Write};
 
+/// Simple command line user interface implementation.
+///
+/// This implementation reads moves from standard input and prints
+/// the board and messages to standard output.
 pub struct CLIInterface;
 
 impl GameInterface for CLIInterface {
     fn get_move(&self, _board: &Board) -> (usize, usize) {
-        // For example, prompt the user for input like "A5" and convert it to coordinates.
+        // Prompt the user for input like "A5" and convert it to coordinates.
         print!("Enter your move (e.g., A5): ");
         io::stdout().flush().unwrap();
         let mut input = String::new();

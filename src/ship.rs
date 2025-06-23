@@ -35,6 +35,7 @@ impl Ship {
     ///
     /// # Example
     /// ```
+    /// use battleship::Ship;
     /// let carrier = Ship::new("Carrier", 5);
     /// assert_eq!(carrier.length(), 5);
     /// assert!(!carrier.is_placed());
@@ -79,6 +80,9 @@ impl Ship {
     ///
     /// # Examples
     /// ```
+    /// use battleship::Ship;
+    /// use battleship::constants::GuessResult;
+    /// use std::collections::HashSet;
     /// let mut ship = Ship::new("Destroyer", 2);
     /// ship.place(HashSet::from([(0,0), (0,1)])).unwrap();
     /// let result = ship.guess((0,0));
