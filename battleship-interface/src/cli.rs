@@ -10,14 +10,22 @@ pub struct CLIInterface;
 
 impl GameInterface for CLIInterface {
     fn get_move(&self, _board: &Board) -> (usize, usize) {
-        // Prompt the user for input like "A5" and convert it to coordinates.
         print!("Enter your move (e.g., A5): ");
         io::stdout().flush().unwrap();
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
-        // Convert input to board coordinates (this is just a placeholder).
-        // You would include proper parsing and error handling.
-        (0, 0)
+        let input = input.trim().to_uppercase();
+        if input.len() < 2 {
+            return (0, 0);
+        }
+        let row_char = input.chars().next().unwrap();
+        let row = row_char as usize - b'A' as usize;
+        let col = input[1..].parse::<usize>().unwrap_or(1);
+        if row >= battleship_core::constants::GRID_SIZE || col == 0 || col > battleship_core::constants::GRID_SIZE {
+            (0, 0)
+        } else {
+            (row, col - 1)
+        }
     }
 
     fn display_board(&self, board: &Board) {

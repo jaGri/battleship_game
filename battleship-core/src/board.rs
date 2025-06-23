@@ -298,6 +298,50 @@ impl Board {
         self.coordinates.difference(&self.guessed)
     }
 
+    /// Formats the board into a string. When `reveal_ships` is false the
+    /// underlying ship positions are hidden and only guesses are shown.
+    pub fn format_board(&self, reveal_ships: bool) -> String {
+        use std::fmt::Write as _;
+
+        let ships = if reveal_ships {
+            self.fleet.ship_coords(true, true)
+        } else {
+            HashSet::new()
+        };
+        let hits = self.fleet.hit_coords(true, true);
+
+        let mut out = String::new();
+        // header
+        out.push_str("   ");
+        for col in 1..=self.gridsize {
+            let _ = write!(out, " {} ", col);
+        }
+        out.push('\n');
+
+        // rows
+        for row in 0..self.gridsize {
+            let _ = write!(out, "{} ", (b'A' + row as u8) as char);
+            for col in 0..self.gridsize {
+                let coord = (row, col);
+                let icon = if self.guessed.contains(&coord) {
+                    if hits.contains(&coord) {
+                        Cell::Hit.icon()
+                    } else {
+                        Cell::Miss.icon()
+                    }
+                } else if reveal_ships && ships.contains(&coord) {
+                    Cell::Ship.icon()
+                } else {
+                    Cell::Empty.icon()
+                };
+                let _ = write!(out, " {} ", icon);
+            }
+            out.push('\n');
+        }
+
+        out
+    }
+
     // pub fn print_grid(&self) {
     //     let ships = self.fleet.ship_coords(true, true);
     //     let hits = self.fleet.hit_coords(true, true);
@@ -334,39 +378,7 @@ impl Board {
 
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let ships = self.fleet.ship_coords(true, true);
-        let hits = self.fleet.hit_coords(true, true);
-
-        // Print header
-        write!(f, "   ")?; // Initial space for row labels
-        for col in 1..=self.gridsize {
-            write!(f, " {} ", col)?;
-        }
-        writeln!(f)?;
-
-        // Print rows
-        for row in 0..self.gridsize {
-            // Print row letter
-            write!(f, "{} ", (b'A' + row as u8) as char)?;
-            for col in 0..self.gridsize {
-                let coord = (row, col);
-                let icon = if self.guessed.contains(&coord) {
-                    if hits.contains(&coord) {
-                        Cell::Hit.icon()
-                    } else {
-                        Cell::Miss.icon()
-                    }
-                } else if ships.contains(&coord) {
-                    Cell::Ship.icon()
-                } else {
-                    Cell::Empty.icon()
-                };
-                write!(f, " {} ", icon)?;
-            }
-            writeln!(f)?;
-        }
-
-        Ok(())
+        write!(f, "{}", self.format_board(true))
     }
 }
 
