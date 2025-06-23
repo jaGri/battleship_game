@@ -1,7 +1,7 @@
 use crate::constants::GameplayError;
 use crate::constants::GameplayError::InvalidPlacement;
 use crate::constants::GuessError;
-use crate::constants::GuessResult;
+use battleship_common::GuessResult;
 use std::collections::HashSet;
 
 /// Represents a single ship in the Battleship game.
@@ -80,7 +80,7 @@ impl Ship {
     /// # Examples
     /// ```
     /// use battleship_core::Ship;
-    /// use battleship_core::constants::GuessResult;
+    /// use battleship_common::GuessResult;
     /// use std::collections::HashSet;
     /// let mut ship = Ship::new("Destroyer", 2);
     /// ship.place(HashSet::from([(0,0), (0,1)])).unwrap();

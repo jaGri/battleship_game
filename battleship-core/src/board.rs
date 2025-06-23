@@ -1,7 +1,7 @@
 use crate::constants::Cell;
 use crate::constants::GameplayError;
 use crate::constants::GuessError;
-use crate::constants::GuessResult;
+use battleship_common::GuessResult;
 use crate::constants::PlayerState;
 use crate::constants::GRID_SIZE;
 use crate::fleet::Fleet;
@@ -247,7 +247,7 @@ impl Board {
     /// # Example
     /// ```
     /// use battleship_core::Board;
-    /// use battleship_core::constants::GuessResult;
+    /// use battleship_common::GuessResult;
     /// let mut board = Board::new();
     /// board.place_ship("Carrier", (0, 0), true).unwrap();
     /// let result = board.guess((0, 0));
