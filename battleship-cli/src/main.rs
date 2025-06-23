@@ -15,7 +15,10 @@ fn run_game<I: GameInterface>(ui: I) {
     ai_board.randomly_place_fleet().unwrap();
 
     loop {
-        ui.display_board(&player_board);
+        ui.display_message("Opponent board:");
+        ui.display_message(&ai_board.format_board(false));
+        ui.display_message("Your board:");
+        ui.display_message(&player_board.format_board(true));
         ui.display_message("Your turn:");
         let coord = ui.get_move(&player_board);
 
@@ -46,8 +49,8 @@ fn run_game<I: GameInterface>(ui: I) {
 
     ui.display_message("Final boards:");
     ui.display_message("AI board:");
-    ui.display_board(&ai_board);
+    ui.display_message(&ai_board.format_board(true));
     ui.display_message("Player board:");
-    ui.display_board(&player_board);
+    ui.display_message(&player_board.format_board(true));
 }
 
