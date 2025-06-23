@@ -9,6 +9,7 @@
 //!
 //! # Usage
 //! ```rust
+//! use battleship_player::posterior::Posterior;
 //!
 //! // Example: one ship length 2, a single hit at (0,0), no misses.
 //! let post = Posterior::new(&[], &[(0,0)], &[2]);
