@@ -65,7 +65,7 @@ impl Board {
     ///
     /// # Example
     /// ```
-    /// use battleship::{Board, PlayerState};
+    /// use battleship_core::{Board, PlayerState};
     /// let mut board = Board::new();
     /// assert_eq!(board.player_state(), PlayerState::Setup);
     /// ```
@@ -182,7 +182,7 @@ impl Board {
     ///
     /// # Example
     /// ```
-    /// use battleship::Board;
+    /// use battleship_core::Board;
     /// let mut board = Board::new();
     /// let result = board.place_ship("Carrier", (0, 0), true);
     /// assert!(result.is_ok());
@@ -246,8 +246,8 @@ impl Board {
     ///
     /// # Example
     /// ```
-    /// use battleship::Board;
-    /// use battleship::constants::GuessResult;
+    /// use battleship_core::Board;
+    /// use battleship_core::constants::GuessResult;
     /// let mut board = Board::new();
     /// board.place_ship("Carrier", (0, 0), true).unwrap();
     /// let result = board.guess((0, 0));
