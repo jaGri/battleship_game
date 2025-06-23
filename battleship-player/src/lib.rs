@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use battleship_common::BoardView;
-use battleship_core::{Board, GuessResult};
+use battleship_core::Board;
+use battleship_common::GuessResult;
 use battleship_interface::GameInterface;
 use battleship_transport::Transport;
 
