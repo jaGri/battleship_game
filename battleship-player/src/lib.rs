@@ -1,9 +1,10 @@
 use async_trait::async_trait;
-use battleship_core::{Board, GuessResult, GuessError};
+use battleship_core::{Board, GuessResult};
 use battleship_interface::GameInterface;
 use battleship_transport::Transport;
 
 pub mod probability;
+pub mod posterior;
 
 /// Core player trait used by the game engine.
 #[async_trait]

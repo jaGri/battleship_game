@@ -9,4 +9,5 @@ battleship-core = { path = "../battleship-core" }
 battleship-interface = { path = "../battleship-interface" }
 battleship-transport = { path = "../battleship-transport" }
 rand = "0.8"
+rayon = "1"
 

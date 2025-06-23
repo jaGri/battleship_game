@@ -2,6 +2,7 @@ use battleship_core::{Board, constants::GRID_SIZE};
 use rand::Rng;
 use std::collections::HashSet;
 use std::fmt::Display;
+use crate::posterior::Posterior;
 
 /// Calculates and displays a 2D array in a formatted way.
 /// Useful for debugging and visualizing probability distributions.
@@ -76,65 +77,14 @@ fn elem_as_f64<T: Display>(elem: &T) -> Option<f64> {
 /// # Returns
 /// * `[[f64; GRID_SIZE]; GRID_SIZE]` - 2D array of probabilities
 fn calc_pdf(board: &Board) -> [[f64; GRID_SIZE]; GRID_SIZE] {
-    let unguessed_coords = board.unguessed();
-    let unsunk_hit_coords: HashSet<(usize, usize)> = board.hit_coords(true, false);
-    let misses_and_sunk_coords = board
-        .guessed()
-        .difference(&unsunk_hit_coords)
-        .cloned()
-        .collect();
-    let unsunk_ship_lengths: Vec<usize> = board.ship_lengths_remaining();
+    let mut misses: HashSet<(usize, usize)> = board.miss_coords();
+    misses.extend(board.hit_coords(false, true));
+    let hits: Vec<(usize, usize)> = board.hit_coords(true, false).into_iter().collect();
+    let miss_vec: Vec<(usize, usize)> = misses.into_iter().collect();
+    let lengths: Vec<usize> = board.ship_lengths_remaining();
 
-    let mut prob_matrix = [[0.0; GRID_SIZE]; GRID_SIZE];
-
-    // Bayesian likelihood parameters
-    const L_HIT: f64 = 5.0;   // For each unsunk hit cell that the placement covers, the likelihood is multiplied by this factor.
-    // Range: Typically between 1.0 and 10.0
-    // Lower Values (1.0 - 3.0): The AI will be more conservative, favoring placements that cover hits but still considering other placements.
-    // Higher Values (4.0 - 10.0): The AI will aggressively favor placements that cover hits, potentially leading to a more focused but less exploratory strategy.
-    const L_NO_HIT: f64 = 0.2; // If there is at least one unsunk hit on the board, and the candidate placement covers none, assign this small likelihood.
-    // Range: Typically between 0.01 and 1.0.
-    // Lower Values (0.01 - 0.1): The AI will be more forgiving of placements that do not cover hits, allowing for a broader search space.
-    // Higher Values (0.2 - 1.0): The AI will heavily penalize placements that do not cover hits, which can lead to a more focused but potentially limited strategy.
-
-    // For each remaining ship, consider all candidate placements.
-    for ship_length in unsunk_ship_lengths {
-        for i in 0..GRID_SIZE {
-            for j in 0..GRID_SIZE {
-                let start_coord = (i, j);
-                for &horizontal in &[true, false] {
-                    let placement = board.calc_placement(start_coord, ship_length, horizontal);
-                    // Skip placements that conflict with observed misses / sunk coordinates.
-                    if !board.valid_placement(&placement, &misses_and_sunk_coords) {
-                        continue;
-                    }
-                    
-                    // Count how many unsunk hit coordinates are explained by this placement.
-                    let n_hits = unsunk_hit_coords.intersection(&placement).count();
-                    let likelihood = if !unsunk_hit_coords.is_empty() {
-                        if n_hits > 0 {
-                            // Multiply evidence: each hit multiplies the likelihood.
-                            L_HIT.powi(n_hits as i32)
-                        } else {
-                            // Placements that do not capture any unsunk hit get penalized.
-                            L_NO_HIT
-                        }
-                    } else {
-                        // No unsunk hits on board implies no additional evidence.
-                        1.0
-                    };
-                    
-                    // Spread the candidate placement's likelihood to all cells that remain unguessed.
-                    for coord in &placement {
-                        if unguessed_coords.contains(&coord) {
-                            prob_matrix[coord.0][coord.1] += likelihood;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    normalize_pdf(&prob_matrix)
+    let posterior = Posterior::new(&miss_vec, &hits, &lengths);
+    posterior.compute()
 }
 
 /// Normalizes a probability density function matrix so all values sum to 1.
