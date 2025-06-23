@@ -26,3 +26,5 @@ Cargo.lock
 Thumbs.db
 
 notes.txt
+!/.vscode/
+!/.vscode/launch.json
