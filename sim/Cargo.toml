@@ -1,0 +1,10 @@
+[package]
+name = "battleship_sim"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+battleship_core = { path = "../core" }
+tokio = { version = "1.0", features = ["macros", "rt"] }
+async-trait = "0.1"
+quickcheck = "1.0"

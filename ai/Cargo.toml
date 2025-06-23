@@ -1,0 +1,11 @@
+[package]
+name = "battleship_ai"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <you@example.com>"]
+description = "AI opponents"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+battleship_core = { path = "../core" }
+rand = "0.8"

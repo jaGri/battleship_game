@@ -1,0 +1,350 @@
+===== File: Cargo.toml =====
+[workspace]
+members = ["core", "ai", "console", "sim"]
+
+===== File: ai\Cargo.toml =====
+[package]
+name = "battleship_ai"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <you@example.com>"]
+description = "AI opponents"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+battleship_core = { path = "../core" }
+rand = "0.8"
+
+===== File: ai\src\lib.rs =====
+//! AI opponents.
+
+use battleship_core::{board::Cell, constants::GRID_SIZE, Board, Move as GameMove, Player};
+use async_trait::async_trait;
+use rand::prelude::*;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Difficulty { Easy, Medium, Hard }
+
+pub struct AiPlayer {
+    difficulty: Difficulty,
+    rng: ThreadRng,
+    tried: Vec<(usize, usize)>,
+}
+
+impl AiPlayer {
+    pub fn new(difficulty: Difficulty) -> Self {
+        AiPlayer { difficulty, rng: thread_rng(), tried: Vec::new() }
+    }
+    pub fn compute_density(&self, obs: &Board) -> [[u32; GRID_SIZE]; GRID_SIZE] {
+        let mut d = [[0; GRID_SIZE]; GRID_SIZE];
+        for &(_, sz) in crate::battleship_core::constants::SHIPS.iter() {
+            for y in 0..GRID_SIZE {
+                for x in 0..=GRID_SIZE - sz { /* ... */ }
+            }
+            for x in 0..GRID_SIZE {
+                for y in 0..=GRID_SIZE - sz { /* ... */ }
+            }
+        }
+        d
+    }
+    fn select_move(&mut self, obs: &Board) -> GameMove {
+        // simplified for brevity
+        GameMove { x: 0, y: 0 }
+    }
+}
+
+#[async_trait]
+impl Player for AiPlayer {
+    async fn next_move(&mut self, opponent_board: &Board) -> GameMove {
+        self.select_move(opponent_board)
+    }
+}
+
+===== File: console\Cargo.toml =====
+[package]
+name = "battleship_console"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+battleship_core = { path = "../core" }
+battleship_ai = { path = "../ai" }
+crossterm = "0.23"
+tokio = { version = "1.0", features = ["full"] }
+clap = { version = "4.0", features = ["derive"] }
+anyhow = "1.0"
+
+===== File: console\src\main.rs =====
+//! Console app.
+
+use clap::Parser;
+use battleship_core::{run_game, Player, Renderer};
+use battleship_console::ui::{ConsoleInput, ConsoleRenderer};
+use battleship_ai::{AiPlayer, Difficulty};
+use std::process;
+
+#[derive(Parser)]
+struct Args {
+    #[arg(long, default_value = "hh", value_parser = ["hh", "ai"])]
+    mode: String,
+    #[arg(long, value_parser = ["easy", "medium", "hard"], required_if_eq("mode", "ai"))]
+    difficulty: Option<String>,
+}
+
+#[tokio::main]
+async fn main() {
+    let args = Args::parse();
+    let mut p1: Box<dyn Player> = Box::new(ConsoleInput::new());
+    let mut p2: Box<dyn Player> = match args.mode.as_str() {
+        "hh" => Box::new(ConsoleInput::new()),
+        "ai" => {
+            let lvl = match args.difficulty.unwrap().as_str() {
+                "easy" => Difficulty::Easy,
+                "medium" => Difficulty::Medium,
+                "hard" => Difficulty::Hard,
+                _ => unreachable!(),
+            };
+            Box::new(AiPlayer::new(lvl))
+        }
+        _ => unreachable!(),
+    };
+    let renderer = ConsoleRenderer::new();
+    if let Err(e) = run_game(&mut *p1, &mut *p2, &renderer).await {
+        eprintln!("Error: {}", e);
+        process::exit(1);
+    }
+}
+
+===== File: console\src\ui.rs =====
+//! Console UI.
+
+use battleship_core::{Board, Cell, Move as GameMove, InputSource, Renderer, CoreError};
+use crossterm::{execute, terminal::{Clear, ClearType}, cursor::MoveTo};
+use std::io::stdout;
+use async_trait::async_trait;
+use tokio::sync::mpsc;
+use tokio::io::{AsyncBufReadExt, BufReader};
+
+pub struct ConsoleInput { rx: mpsc::Receiver<GameMove> }
+impl ConsoleInput {
+    pub fn new() -> Self { /* spawn reader */ ConsoleInput { rx: mpsc::channel(1).1 } }
+}
+#[async_trait]
+impl InputSource for ConsoleInput {
+    async fn poll(&mut self) -> Option<GameMove> { self.rx.recv().await }
+}
+
+pub struct ConsoleRenderer;
+impl ConsoleRenderer { pub fn new() -> Self { Self } }
+#[async_trait]
+impl Renderer for ConsoleRenderer {
+    async fn render(&self, own: &Board, opp: &Board) -> Result<(), CoreError> {
+        execute!(stdout(), Clear(ClearType::All), MoveTo(0, 0))?;
+        Ok(())
+    }
+}
+
+===== File: core\Cargo.toml =====
+[package]
+name = "battleship_core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <you@example.com>"]
+description = "Core game logic and types for Battleship"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+async-trait = "0.1"
+thiserror = "1.0"
+anyhow = "1.0"
+log = "0.4"
+rand = "0.8"
+
+[features]
+default = ["std"]
+std = []
+no_std = []
+
+===== File: core\src\board.rs =====
+//! Board representation and ship placement logic.
+
+use crate::constants::GRID_SIZE;
+
+/// Cell state in the game board.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Cell {
+    Empty,
+    Ship,
+    Hit,
+    Miss,
+}
+
+/// Represents a Battleship board.
+#[derive(Clone, Debug)]
+pub struct Board {
+    pub grid: [[Cell; GRID_SIZE]; GRID_SIZE],
+}
+
+impl Board {
+    pub fn new() -> Self {
+        Self { grid: [[Cell::Empty; GRID_SIZE]; GRID_SIZE] }
+    }
+
+    pub fn place_ship(&mut self, x: usize, y: usize, length: usize, horizontal: bool) -> bool {
+        if horizontal {
+            if x + length > GRID_SIZE { return false; }
+        } else {
+            if y + length > GRID_SIZE { return false; }
+        }
+        for i in 0..length {
+            let (cx, cy) = if horizontal { (x + i, y) } else { (x, y + i) };
+            if self.grid[cy][cx] != Cell::Empty { return false; }
+        }
+        for i in 0..length {
+            let (cx, cy) = if horizontal { (x + i, y) } else { (x, y + i) };
+            self.grid[cy][cx] = Cell::Ship;
+        }
+        true
+    }
+
+    pub fn fire(&mut self, x: usize, y: usize) -> bool {
+        match self.grid[y][x] {
+            Cell::Ship => { self.grid[y][x] = Cell::Hit; true }
+            Cell::Empty => { self.grid[y][x] = Cell::Miss; false }
+            _ => false,
+        }
+    }
+
+    pub fn all_ships_sunk(&self) -> bool {
+        self.grid.iter().flatten().all(|&c| c != Cell::Ship)
+    }
+}
+
+===== File: core\src\constants.rs =====
+//! Game configuration constants.
+
+/// Size of the square grid (NxN).
+pub const GRID_SIZE: usize = 10;
+
+/// Ships available in the game with name and size.
+pub const SHIPS: &[(&str, usize)] = &[
+    ("Carrier", 5),
+    ("Battleship", 4),
+    ("Cruiser", 3),
+    ("Submarine", 3),
+    ("Destroyer", 2),
+];
+
+===== File: core\src\gameplay.rs =====
+//! Gameplay loop.
+
+use async_trait::async_trait;
+use thiserror::Error;
+use crate::{Board};
+use crate::constants::GRID_SIZE;
+use crate::setup::random_setup;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Move { pub x: usize, pub y: usize }
+
+#[derive(Debug, Error)]
+pub enum CoreError {
+    #[error("Invalid move: ({0.x}, {0.y})")] InvalidMove(Move),
+    #[error("Render error: {0}")] RenderError(String),
+}
+
+#[async_trait]
+pub trait Player: Send { async fn next_move(&mut self, opponent_board: &Board) -> Move; }
+#[async_trait]
+pub trait Renderer: Sync { async fn render(&self, own_board: &Board, opponent_board: &Board) -> Result<(), CoreError>; }
+#[async_trait]
+pub trait InputSource: Send { async fn poll(&mut self) -> Option<Move>; }
+
+pub async fn run_game<P1, P2, R>(player1: &mut P1, player2: &mut P2, renderer: &R) -> Result<(), CoreError>
+where P1: Player, P2: Player, R: Renderer {
+    let mut board1 = random_setup();
+    let mut board2 = random_setup();
+    let mut turn = 0;
+    loop {
+        let (active, passive, own) = if turn % 2 == 0 {
+            (player1, &mut board2, &board1)
+        } else {
+            (player2, &mut board1, &board2)
+        };
+        renderer.render(own, passive).await.map_err(|e| CoreError::RenderError(e.to_string()))?;
+        let mv = active.next_move(passive).await;
+        if mv.x >= GRID_SIZE || mv.y >= GRID_SIZE { return Err(CoreError::InvalidMove(mv)); }
+        let _ = passive.fire(mv.x, mv.y);
+        renderer.render(own, passive).await.map_err(|e| CoreError::RenderError(e.to_string()))?;
+        if passive.all_ships_sunk() { break; }
+        turn += 1;
+    }
+    Ok(())
+}
+
+===== File: core\src\lib.rs =====
+//! # Battleship Core
+//! Provides the core game logic, state types, and traits.
+//! Supports both `std` and `no_std` environments via feature flags.
+#![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(feature = "std")]
+extern crate std;
+
+pub mod constants;
+pub mod board;
+pub mod setup;
+pub mod gameplay;
+
+pub use constants::*;
+pub use board::Board;
+pub use gameplay::{Move as GameMove, Player, Renderer, InputSource, run_game, CoreError};
+
+===== File: core\src\setup.rs =====
+//! Random ship placement.
+
+use crate::board::Board;
+use crate::constants::{SHIPS, GRID_SIZE};
+use rand::{thread_rng, Rng};
+
+pub fn random_setup() -> Board {
+    let mut board = Board::new();
+    let mut rng = thread_rng();
+    for &(_, size) in SHIPS.iter() {
+        loop {
+            let x = rng.gen_range(0..GRID_SIZE);
+            let y = rng.gen_range(0..GRID_SIZE);
+            let horizontal = rng.gen_bool(0.5);
+            if board.place_ship(x, y, size, horizontal) { break; }
+        }
+    }
+    board
+}
+
+===== File: sim\Cargo.toml =====
+[package]
+name = "battleship_sim"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+battleship_core = { path = "../core" }
+tokio = { version = "1.0", features = ["macros", "rt"] }
+async-trait = "0.1"
+quickcheck = "1.0"
+
+===== File: sim\src\lib.rs =====
+//! Simulation and tests.
+
+#[cfg(test)]
+mod tests {
+    use battleship_core::{Board, Cell, constants::SHIPS};
+    use battleship_core::{setup::random_setup};
+    use battleship_core::gameplay::{run_game, Player, Renderer, CoreError, Move as GameMove};
+    use async_trait::async_trait;
+    #[tokio::test] async fn test_random_setup() { /* ... */ }
+    #[test] fn test_place() { /* ... */ }
+    #[quickcheck] fn prop_place(x: u8, y: u8, len: u8, horiz: bool) -> bool { true }
+}
+
