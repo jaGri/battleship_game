@@ -3,9 +3,10 @@ name = "battleship-transport"
 version = "0.1.0"
 edition = "2021"
 
+
 [dependencies]
 async-trait = "0.1"
-battleship-common = { path = "../battleship-common" }
+battleship-core = { path = "../battleship-core" }
 
 [dev-dependencies]
 

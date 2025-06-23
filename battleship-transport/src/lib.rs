@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use battleship_common::GuessResult;
+use battleship_core::GuessResult;
 
 #[async_trait]
 pub trait Transport {
