@@ -1,17 +1,2 @@
 [workspace]
-members = [
-    "battleship-core",
-    "battleship-interface",
-    "battleship-transport",
-    "battleship-player",
-    "battleship-common",
-    "battleship-config",
-    "battleship-save",
-    "battleship-audio",
-    "battleship-metrics",
-    "battleship-sim",
-    "battleship-cli",
-    "battleship-engine",
-    "battleship-embedded",
-]
-resolver = "2"
+members = ["core", "transport", "interface-cli", "interface-embedded", "player", "persistence", "app"]

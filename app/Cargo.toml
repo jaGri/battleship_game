@@ -1,0 +1,15 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+core = { path = "../core" }
+transport = { path = "../transport" }
+interface-cli = { path = "../interface-cli" }
+persistence = { path = "../persistence" }
+player = { path = "../player" }
+clap = "4.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tokio = { version = "1", features = ["full"] }
