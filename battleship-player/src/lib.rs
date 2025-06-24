@@ -1,12 +1,11 @@
 use async_trait::async_trait;
 use battleship_common::BoardView;
-use battleship_core::Board;
-use battleship_common::GuessResult;
+use battleship_core::{Board, GuessResult};
 use battleship_interface::GameInterface;
 use battleship_transport::Transport;
 
-pub mod probability;
 pub mod posterior;
+pub mod probability;
 
 /// Core player trait used by the game engine.
 #[async_trait]
@@ -21,7 +20,9 @@ pub struct HumanPlayer<I: GameInterface> {
 }
 
 impl<I: GameInterface> HumanPlayer<I> {
-    pub fn new(interface: I) -> Self { Self { interface } }
+    pub fn new(interface: I) -> Self {
+        Self { interface }
+    }
 }
 
 #[async_trait]
@@ -58,7 +59,9 @@ pub struct RemotePlayer<I: GameInterface, T: Transport> {
 }
 
 impl<I: GameInterface, T: Transport> RemotePlayer<I, T> {
-    pub fn new(iface: I, transport: T) -> Self { Self { iface, transport } }
+    pub fn new(iface: I, transport: T) -> Self {
+        Self { iface, transport }
+    }
 }
 
 #[async_trait]
