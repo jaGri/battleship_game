@@ -2,3 +2,7 @@
 name = "interface-embedded"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+game-core = { package = "core", path = "../core" }
+interface-cli = { path = "../interface-cli" }

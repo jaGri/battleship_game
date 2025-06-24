@@ -5,7 +5,7 @@ use crate::ship::ShipType;
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum Phase { Handshake, Placement, Playing, Finished }
 
-#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum PlayerId { One, Two }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -22,22 +22,25 @@ impl GameState {
             turn: PlayerId::One, phase: Phase::Handshake }
     }
     pub fn receive_attack(&mut self, attacker: PlayerId, x: u8, y: u8) -> (bool, Option<ShipType>) {
-        let (board, ships) = match attacker {
-            PlayerId::One => (&mut self.board_p2, &mut self.board_p2.ships),
-            PlayerId::Two => (&mut self.board_p1, &mut self.board_p1.ships),
+        let board = match attacker {
+            PlayerId::One => &mut self.board_p2,
+            PlayerId::Two => &mut self.board_p1,
         };
-        if let Some(idx) = board.grid_index(x,y) {
+        if let Some(idx) = board.grid_index(x, y) {
             let cell = &mut board.cells[idx];
             if let crate::state::Cell::Ship(id) = *cell {
                 *cell = crate::state::Cell::Hit;
-                let ship = &mut ships[id as usize];
-                ship.hits += 1;
-                if ship.hits >= ship.length {
-                    for &(sx,sy) in &ship.positions {
-                        let i = board.grid_index(sx,sy).unwrap();
+                let (ship_type, positions, hits, length) = {
+                    let ship = &mut board.ships[id as usize];
+                    ship.hits += 1;
+                    (ship.ship_type, ship.positions.clone(), ship.hits, ship.length)
+                };
+                if hits >= length as usize {
+                    for &(sx, sy) in &positions {
+                        let i = board.grid_index(sx, sy).unwrap();
                         board.cells[i] = crate::state::Cell::Sunk;
                     }
-                    return (true, Some(ship.ship_type));
+                    return (true, Some(ship_type));
                 }
                 return (true, None);
             } else {

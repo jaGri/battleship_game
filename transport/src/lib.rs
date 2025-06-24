@@ -1,13 +1,10 @@
 use async_trait::async_trait;
-use crate::adapters::InMemTransport;
-use crate::adapters::TcpTransport;
-use crate::adapters::BtleTransport;
-use crate::adapters;
-use crate::RawTransport;
-use crate::message::Envelope;
-use bincode;
+use game_core::message::{Envelope, Message};
 use std::{io, time::Duration};
-use tokio::time::{sleep, timeout};
+use tokio::time::timeout;
+
+pub mod adapters;
+use bincode;
 
 #[async_trait]
 pub trait RawTransport {
@@ -31,7 +28,10 @@ impl<T: RawTransport + Send> ReliableTransport<T> {
     pub fn with_retries(mut self, retries: usize) -> Self { self.retry_limit = retries; self }
     pub fn with_timeout(mut self, ms: u64) -> Self { self.timeout_ms = ms; self }
 
-    pub async fn send(&mut self, payload: crate::message::Message) -> Result<(), T::Error> {
+    pub async fn send(&mut self, payload: Message) -> Result<(), T::Error>
+    where
+        <T as RawTransport>::Error: From<io::Error>,
+    {
         let env = Envelope { seq: self.send_seq, ack: Some(self.recv_ack), payload };
         let buf = bincode::serialize(&env).unwrap();
         let mut attempts = 0;
@@ -54,7 +54,10 @@ impl<T: RawTransport + Send> ReliableTransport<T> {
         Err(io::Error::new(io::ErrorKind::TimedOut, "send retry limit").into())
     }
 
-    pub async fn recv(&mut self) -> Result<crate::message::Message, T::Error> {
+    pub async fn recv(&mut self) -> Result<Message, T::Error>
+    where
+        <T as RawTransport>::Error: From<io::Error>,
+    {
         let mut attempts = 0;
         while attempts < self.retry_limit {
             attempts += 1;

@@ -2,7 +2,7 @@ use serde_json;
 use std::fs;
 use std::io;
 use std::path::Path;
-use crate::state::GameState;
+use game_core::state::GameState;
 
 pub trait Persistence {
     fn save(&self, state: &GameState, path: &Path) -> io::Result<()>;
