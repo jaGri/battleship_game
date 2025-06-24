@@ -1,4 +1,3 @@
-use crate::state::Orientation;
 use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, Eq)]
@@ -16,7 +15,7 @@ impl ShipType {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Ship {
     pub ship_type: ShipType,
     pub positions: Vec<(u8,u8)>,

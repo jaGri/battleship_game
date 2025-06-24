@@ -6,8 +6,8 @@ use tokio::net::TcpListener;
 use tokio::io;
 use std::path::Path;
 
-use core::{GameState, PlayerId, Phase};
-use core::message::Message;
+use game_core::{GameState, PlayerId, Phase};
+use game_core::message::Message;
 use transport::{RawTransport, ReliableTransport};
 use transport::adapters::{InMemTransport, TcpTransport, BtleTransport};
 use persistence::JsonPersistence;
@@ -59,7 +59,7 @@ async fn main() -> io::Result<()> {
         mode, addr, buffer, width, height, layout_path);
 
     let mut state = if let Some(path) = layout_path {
-        core::layout::ShipLayout::apply
+        game_core::layout::ShipLayout::apply
     GameState::from_file(path, width, height).unwrap_or_else(|_| GameState::new(width, height))
     } else {
         GameState::new(width, height)

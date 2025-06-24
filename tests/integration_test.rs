@@ -1,8 +1,8 @@
 use tokio::runtime::Runtime;
 use transport::adapters::InMemTransport;
 use transport::ReliableTransport;
-use core::{GameState, PlayerId};
-use core::message::Message;
+use game_core::{GameState, PlayerId};
+use game_core::message::Message;
 use player::ProbAi;
 use player::Difficulty;
 
