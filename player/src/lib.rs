@@ -2,7 +2,7 @@ mod ai;
 pub use ai::{ProbAi, Difficulty};
 
 use async_trait::async_trait;
-use core::state::GameState;
+use game_core::state::GameState;
 use interface_cli::{InputProvider, OutputRenderer, InputEvent};
 
 #[derive(Clone, Copy, Debug)]
