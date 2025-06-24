@@ -22,22 +22,25 @@ impl GameState {
             turn: PlayerId::One, phase: Phase::Handshake }
     }
     pub fn receive_attack(&mut self, attacker: PlayerId, x: u8, y: u8) -> (bool, Option<ShipType>) {
-        let (board, ships) = match attacker {
-            PlayerId::One => (&mut self.board_p2, &mut self.board_p2.ships),
-            PlayerId::Two => (&mut self.board_p1, &mut self.board_p1.ships),
+        let board = match attacker {
+            PlayerId::One => &mut self.board_p2,
+            PlayerId::Two => &mut self.board_p1,
         };
         if let Some(idx) = board.grid_index(x,y) {
             let cell = &mut board.cells[idx];
             if let crate::state::Cell::Ship(id) = *cell {
                 *cell = crate::state::Cell::Hit;
-                let ship = &mut ships[id as usize];
+                let ship = &mut board.ships[id as usize];
                 ship.hits += 1;
-                if ship.hits >= ship.length {
-                    for &(sx,sy) in &ship.positions {
-                        let i = board.grid_index(sx,sy).unwrap();
+                let sunk = ship.hits >= ship.length as usize;
+                let ship_type = ship.ship_type;
+                let positions = ship.positions.clone();
+                if sunk {
+                    for &(sx, sy) in &positions {
+                        let i = board.grid_index(sx, sy).unwrap();
                         board.cells[i] = crate::state::Cell::Sunk;
                     }
-                    return (true, Some(ship.ship_type));
+                    return (true, Some(ship_type));
                 }
                 return (true, None);
             } else {
@@ -47,7 +50,7 @@ impl GameState {
         (false, None)
     }
     pub fn apply_attack(&mut self, attacker: PlayerId, x:u8, y:u8) {
-        let _ = self.receive_attack(attacker, x,y);
+        let _ = self.receive_attack(attacker.clone(), x, y);
         self.turn = match attacker { PlayerId::One=>PlayerId::Two, PlayerId::Two=>PlayerId::One };
     }
     pub fn is_valid_attack(&self, attacker: PlayerId, x:u8, y:u8) -> bool {

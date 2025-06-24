@@ -2,3 +2,7 @@
 name = "interface-embedded"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+battleship-core = { path = "../core", package = "core" }
+interface-cli = { path = "../interface-cli" }
