@@ -1,5 +1,25 @@
 // Constants related to the game configuration
 
+/// Result of a guess on the game board.
+#[derive(Debug, PartialEq)]
+pub enum GuessResult {
+    /// Shot missed all ships.
+    Miss,
+    /// Shot hit a ship but didn't sink it.
+    Hit,
+    /// Shot hit and sunk a ship (includes ship name).
+    Sunk(&'static str),
+}
+
+impl std::fmt::Display for GuessResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GuessResult::Miss => write!(f, "Miss"),
+            GuessResult::Hit => write!(f, "Hit"),
+            GuessResult::Sunk(name) => write!(f, "The {} was sunk!", name),
+        }
+    }
+}
 
 /// Represents possible errors during guess attempts
 #[derive(Debug)]

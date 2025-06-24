@@ -79,8 +79,7 @@ impl Ship {
     ///
     /// # Examples
     /// ```
-    /// use battleship_core::Ship;
-    /// use battleship_common::GuessResult;
+    /// use battleship_core::{Ship, GuessResult};
     /// use std::collections::HashSet;
     /// let mut ship = Ship::new("Destroyer", 2);
     /// ship.place(HashSet::from([(0,0), (0,1)])).unwrap();

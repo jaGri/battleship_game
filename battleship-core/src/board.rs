@@ -1,10 +1,10 @@
 use crate::constants::Cell;
 use crate::constants::GameplayError;
 use crate::constants::GuessError;
-use crate::GuessResult;
 use crate::constants::PlayerState;
 use crate::fleet::Fleet;
 use crate::ship::Ship;
+use crate::GuessResult;
 use battleship_config::GRID_SIZE;
 use rand::{seq::IteratorRandom, thread_rng, Rng};
 use std::collections::HashSet;
@@ -246,8 +246,7 @@ impl Board {
     ///
     /// # Example
     /// ```
-    /// use battleship_core::Board;
-    /// use battleship_common::GuessResult;
+    /// use battleship_core::{Board, GuessResult};
     /// let mut board = Board::new();
     /// board.place_ship("Carrier", (0, 0), true).unwrap();
     /// let result = board.guess((0, 0));
