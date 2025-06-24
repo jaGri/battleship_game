@@ -64,7 +64,7 @@ impl Ship {
         if coords.len() != self.length {
             return Err(InvalidPlacement);
         }
-        self.coords.extend(coords.into_iter());
+        self.coords.extend(coords);
         self.placed = true;
         Ok(())
     }

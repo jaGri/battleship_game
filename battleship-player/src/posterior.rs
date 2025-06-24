@@ -16,16 +16,17 @@
 //! let heatmap = post.compute();  // [[f64;10];10] sums to 1.0
 //! ```
 
+use battleship_config::GRID_SIZE;
 use rayon::prelude::*;
 use std::collections::HashMap;
-use battleship_config::GRID_SIZE;
-type Mask = u128;  // 100 bits → 10×10 grid
+type Mask = u128; // 100 bits → 10×10 grid
 
 /// Packs a list of (row, col) coordinates into a single `Mask`,
 /// with bit (r*10 + c) set to 1 for each occupied cell.
 fn coords_to_mask(coords: &[(usize, usize)]) -> Mask {
-    coords.iter()
-          .fold(0, |mask, &(r, c)| mask | (1 << (r * GRID_SIZE + c)))
+    coords
+        .iter()
+        .fold(0, |mask, &(r, c)| mask | (1 << (r * GRID_SIZE + c)))
 }
 
 /// Generate every possible placement of a ship of length `length`, excluding any which
@@ -66,8 +67,8 @@ fn gen_placements(exclude_mask: Mask, length: usize) -> Vec<Mask> {
 pub struct Posterior {
     miss_mask: Mask,
     hit_mask: Mask,
-    placements: Vec<Vec<Mask>>,  // All valid placements for each remaining ship
-    future_union: Vec<Mask>,     // Pruning masks: union of placements[depth..]
+    placements: Vec<Vec<Mask>>, // All valid placements for each remaining ship
+    future_union: Vec<Mask>,    // Pruning masks: union of placements[depth..]
 }
 
 impl Posterior {
@@ -83,7 +84,7 @@ impl Posterior {
         unsunk_ship_lengths: &[usize],
     ) -> Self {
         let miss_mask = coords_to_mask(misses);
-        let hit_mask  = coords_to_mask(hits);
+        let hit_mask = coords_to_mask(hits);
 
         let mut placements: Vec<Vec<Mask>> = unsunk_ship_lengths
             .iter()
@@ -93,7 +94,7 @@ impl Posterior {
         let mut zipped: Vec<_> = unsunk_ship_lengths
             .iter()
             .cloned()
-            .zip(placements.into_iter())
+            .zip(placements)
             .collect();
         zipped.sort_by_key(|(_, p)| p.len());
         placements = zipped.into_iter().map(|(_, p)| p).collect();
@@ -101,11 +102,18 @@ impl Posterior {
         let n = placements.len();
         let mut future_union = vec![0; n + 1];
         for d in (0..n).rev() {
-            let u = placements[d].iter().fold(future_union[d + 1], |acc, &m| acc | m);
+            let u = placements[d]
+                .iter()
+                .fold(future_union[d + 1], |acc, &m| acc | m);
             future_union[d] = u;
         }
 
-        Posterior { miss_mask, hit_mask, placements, future_union }
+        Posterior {
+            miss_mask,
+            hit_mask,
+            placements,
+            future_union,
+        }
     }
 
     /// Compute the 10×10 posterior heatmap `[[f64;10];10]` summing to 1.0.
@@ -129,9 +137,9 @@ impl Posterior {
             if depth == cfg.placements.len() {
                 if used & cfg.hit_mask == cfg.hit_mask {
                     *weight += 1.0;
-                    for bit in 0..(GRID_SIZE * GRID_SIZE) {
+                    for (bit, count) in counts.iter_mut().enumerate() {
                         if (used >> bit) & 1 == 1 {
-                            counts[bit] += 1.0;
+                            *count += 1.0;
                         }
                     }
                 }
@@ -141,8 +149,8 @@ impl Posterior {
             let key = (depth, used);
             if let Some(&(w, ref subtotal)) = memo.get(&key) {
                 *weight += w;
-                for i in 0..subtotal.len() {
-                    counts[i] += subtotal[i];
+                for (i, val) in subtotal.iter().enumerate() {
+                    counts[i] += val;
                 }
                 return;
             }
@@ -151,7 +159,9 @@ impl Posterior {
             let mut local_counts = vec![0f64; GRID_SIZE * GRID_SIZE];
 
             for &placement_mask in &cfg.placements[depth] {
-                if used & placement_mask != 0 { continue; }
+                if used & placement_mask != 0 {
+                    continue;
+                }
                 backtrack(
                     depth + 1,
                     used | placement_mask,
@@ -164,8 +174,8 @@ impl Posterior {
 
             memo.insert(key, (local_weight, local_counts.clone()));
             *weight += local_weight;
-            for i in 0..local_counts.len() {
-                counts[i] += local_counts[i];
+            for (i, val) in local_counts.iter().enumerate() {
+                counts[i] += val;
             }
         }
 
@@ -191,15 +201,15 @@ impl Posterior {
 
         for (counts, w) in partials {
             total_weight += w;
-            for i in 0..counts.len() {
-                cell_counts[i] += counts[i];
+            for (i, val) in counts.iter().enumerate() {
+                cell_counts[i] += val;
             }
         }
 
         let mut heatmap = [[0.0; GRID_SIZE]; GRID_SIZE];
         if total_weight > 0.0 {
-            for bit in 0..(GRID_SIZE * GRID_SIZE) {
-                let p = cell_counts[bit] / total_weight;
+            for (bit, val) in cell_counts.iter().enumerate() {
+                let p = val / total_weight;
                 let r = bit / GRID_SIZE;
                 let c = bit % GRID_SIZE;
                 heatmap[r][c] = p;
@@ -213,7 +223,9 @@ impl Posterior {
 mod tests {
     use super::*;
 
-    fn approx_eq(a: f64, b: f64) -> bool { (a - b).abs() < 1e-8 }
+    fn approx_eq(a: f64, b: f64) -> bool {
+        (a - b).abs() < 1e-8
+    }
 
     #[test]
     fn test_single_length1_uniform() {
@@ -255,4 +267,3 @@ mod tests {
         }
     }
 }
-
