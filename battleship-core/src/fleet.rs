@@ -2,12 +2,12 @@ use std::collections::HashSet;
 
 use crate::constants::GameplayError;
 use crate::constants::GuessError;
-use battleship_common::GuessResult;
+use crate::GuessResult;
 
 use battleship_config::SHIPS;
 
 use crate::constants::GameplayError::ShipNotFound;
-use battleship_common::GuessResult::{Hit, Miss, Sunk};
+use crate::GuessResult::{Hit, Miss, Sunk};
 use crate::ship::Ship;
 
 use array_init::array_init;
