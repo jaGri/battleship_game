@@ -1,7 +1,7 @@
 use crate::constants::Cell;
 use crate::constants::GameplayError;
 use crate::constants::GuessError;
-use battleship_common::GuessResult;
+use crate::GuessResult;
 use crate::constants::PlayerState;
 use crate::fleet::Fleet;
 use crate::ship::Ship;
