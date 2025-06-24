@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-core = { path = "../core" }
+game-core = { package = "core", path = "../core" }
 transport = { path = "../transport" }
 interface-cli = { path = "../interface-cli" }
 persistence = { path = "../persistence" }

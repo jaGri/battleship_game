@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use crate::transport::ReliableTransport;
-use core::state::{GameState, PlayerId, Phase, Orientation};
-use core::ship::ShipType;
-use core::message::Message;
+use game_core::state::{GameState, PlayerId, Phase, Orientation};
+use game_core::ship::ShipType;
+use game_core::message::Message;
 use interface_cli::{InputProvider, OutputRenderer, InputEvent};
 use std::io;
 

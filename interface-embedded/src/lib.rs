@@ -1,11 +1,11 @@
 // Stub for embedded interface
-use crate::state::Orientation;
-use core::state::GameState;
-use crate::message::Message;
+use game_core::state::{Orientation, GameState};
+use game_core::message::Message;
+use interface_cli::InputEvent;
 
 pub struct EmbeddedInput;
 impl EmbeddedInput { pub fn new() -> Self { EmbeddedInput } }
-impl EmbeddedInput { pub fn read_buttons(&self) -> super::interface_cli::InputEvent { unimplemented!() } }
+impl EmbeddedInput { pub fn read_buttons(&self) -> InputEvent { unimplemented!() } }
 
 pub struct EmbeddedDisplay;
 impl EmbeddedDisplay { pub fn new() -> Self { EmbeddedDisplay } }

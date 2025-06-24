@@ -1,10 +1,8 @@
-use crate::constants::{BOARD_WIDTH, BOARD_HEIGHT};
-use crate::state::Orientation;
-use crate::fleet::Fleet;
+use serde::{Deserialize, Serialize};
 use crate::ship::ShipType;
-use crate::state::Cell;
+use crate::state::{Cell, Orientation};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Board {
     pub width: u8,
     pub height: u8,
@@ -55,6 +53,6 @@ impl Board {
         matches!(self.idx(x,y).and_then(|i| Some(self.cells[i])), Some(Cell::Empty)|Some(Cell::Ship(_)))
     }
     pub fn all_sunk(&self) -> bool {
-        self.ships.iter().all(|s| s.hits >= s.length)
+        self.ships.iter().all(|s| s.hits >= s.length as usize)
     }
 }
