@@ -8,6 +8,9 @@ async-trait = "0.1"
 battleship-core = { path = "../battleship-core" }
 battleship-interface = { path = "../battleship-interface" }
 battleship-player = { path = "../battleship-player" }
+battleship-transport = { path = "../battleship-transport" }
+battleship-engine = { path = "../battleship-engine" }
+futures = "0.3"
 
 [[bin]]
 name = "battleship-cli"

@@ -48,7 +48,7 @@ pub enum GameplayError {
 }
 
 /// Represents the state of a player
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum PlayerState {
     /// Player is still placing ships
     Setup,

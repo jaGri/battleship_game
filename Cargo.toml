@@ -11,6 +11,7 @@ members = [
     "battleship-metrics",
     "battleship-sim",
     "battleship-cli",
+    "battleship-engine",
     "battleship-embedded",
 ]
 resolver = "2"
