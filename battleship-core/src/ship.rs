@@ -1,7 +1,7 @@
 use crate::constants::GameplayError;
 use crate::constants::GameplayError::InvalidPlacement;
 use crate::constants::GuessError;
-use battleship_common::GuessResult;
+use crate::GuessResult;
 use std::collections::HashSet;
 
 /// Represents a single ship in the Battleship game.
