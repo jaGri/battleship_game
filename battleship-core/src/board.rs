@@ -419,3 +419,40 @@ impl battleship_common::BoardView for Board {
         self.gridsize
     }
 }
+
+/// Lightweight snapshot of a board used for transport between components.
+#[derive(Clone, Debug)]
+pub struct BoardState {
+    /// Grid dimension (always square)
+    pub grid_size: usize,
+    /// Preformatted board view
+    pub board: String,
+    /// Human readable ship status line
+    pub ships: String,
+    /// Current state of the player
+    pub state: PlayerState,
+}
+
+impl BoardState {
+    /// Create a new snapshot from the given board.
+    pub fn new(board: &Board, reveal_ships: bool) -> Self {
+        Self {
+            grid_size: board.gridsize,
+            board: board.format_board(reveal_ships),
+            ships: board.format_ship_status(),
+            state: board.player_state(),
+        }
+    }
+}
+
+impl std::fmt::Display for BoardState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.board)
+    }
+}
+
+impl battleship_common::BoardView for BoardState {
+    fn grid_size(&self) -> usize {
+        self.grid_size
+    }
+}

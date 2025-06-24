@@ -79,3 +79,41 @@ where
         let _ = self.transport.send_result(result).await;
     }
 }
+
+/// Client that communicates exclusively via a [`Transport`] and
+/// displays state through a [`GameInterface`].
+pub struct InterfaceClient<I: GameInterface, T: Transport> {
+    iface: I,
+    transport: T,
+}
+
+impl<I: GameInterface, T: Transport> InterfaceClient<I, T> {
+    pub fn new(iface: I, transport: T) -> Self {
+        Self { iface, transport }
+    }
+
+    pub async fn run(&mut self) {
+        loop {
+            let my_state = self.transport.recv_board_state().await;
+            let opp_state = self.transport.recv_board_state().await;
+
+            self.iface.display_message("Opponent board:");
+            self.iface.display_board(&opp_state);
+            self.iface.display_message(&opp_state.ships);
+            self.iface.display_message("Your board:");
+            self.iface.display_board(&my_state);
+            self.iface.display_message(&my_state.ships);
+
+            if my_state.state == battleship_core::PlayerState::Dead
+                || opp_state.state == battleship_core::PlayerState::Dead
+            {
+                break;
+            }
+
+            let mv = self.iface.get_move(&opp_state);
+            self.transport.send_move(mv).await;
+            let res = self.transport.recv_result().await;
+            self.iface.display_message(&format!("{}", res));
+        }
+    }
+}

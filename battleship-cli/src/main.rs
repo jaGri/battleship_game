@@ -1,60 +1,29 @@
-use battleship_core::{constants::PlayerState, Board};
-use battleship_interface::{cli::CLIInterface, GameInterface};
-use battleship_player::probability;
+use battleship_engine::Engine;
+use battleship_interface::cli::CLIInterface;
+use battleship_player::InterfaceClient;
+use battleship_transport::LocalTransport;
+use futures::executor::block_on;
 
 fn main() {
-    let ui = CLIInterface;
-    run_game(ui);
-}
+    let ui1 = CLIInterface;
+    let ui2 = CLIInterface;
 
-fn run_game(ui: CLIInterface) {
-    let mut player_board = Board::new();
-    let mut ai_board = Board::new();
+    let (player1_transport, engine_t1) = LocalTransport::pair();
+    let (player2_transport, engine_t2) = LocalTransport::pair();
 
-    player_board.randomly_place_fleet().unwrap();
-    ai_board.randomly_place_fleet().unwrap();
+    let handle1 = std::thread::spawn(move || {
+        let mut client = InterfaceClient::new(ui1, player1_transport);
+        block_on(client.run());
+    });
 
-    loop {
-        ui.display_message("Opponent board:");
-        ui.display_message(&ai_board.format_board(false));
-        ui.display_message(&ai_board.format_ship_status());
-        ui.display_message("Your board:");
-        ui.display_message(&player_board.format_board(true));
-        ui.display_message(&player_board.format_ship_status());
-        ui.display_message("Your turn:");
-        let suggestion = probability::calc_pdf_and_guess(&ai_board);
-        let coord = ui.get_move_with_default(&ai_board, suggestion);
+    let handle2 = std::thread::spawn(move || {
+        let mut client = InterfaceClient::new(ui2, player2_transport);
+        block_on(client.run());
+    });
 
-        match ai_board.guess(coord) {
-            Ok(result) => ui.display_message(&format!("You: {}", result)),
-            Err(e) => {
-                ui.display_message(&format!("Error: {:?}", e));
-                continue;
-            }
-        }
+    let mut engine = Engine::new(engine_t1, engine_t2);
+    block_on(engine.run());
 
-        if ai_board.player_state() == PlayerState::Dead {
-            ui.display_message("You won!");
-            break;
-        }
-
-        let ai_guess = probability::calc_pdf_and_guess(&player_board);
-        match player_board.guess(ai_guess) {
-            Ok(result) => ui.display_message(&format!("AI: {}", result)),
-            Err(e) => ui.display_message(&format!("AI Error: {:?}", e)),
-        }
-
-        if player_board.player_state() == PlayerState::Dead {
-            ui.display_message("AI won!");
-            break;
-        }
-    }
-
-    ui.display_message("Final boards:");
-    ui.display_message("AI board:");
-    ui.display_message(&ai_board.format_board(true));
-    ui.display_message(&ai_board.format_ship_status());
-    ui.display_message("Player board:");
-    ui.display_message(&player_board.format_board(true));
-    ui.display_message(&player_board.format_ship_status());
+    handle1.join().unwrap();
+    handle2.join().unwrap();
 }
