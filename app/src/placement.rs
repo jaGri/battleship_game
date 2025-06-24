@@ -1,8 +1,8 @@
 use async_trait::async_trait;
-use crate::transport::ReliableTransport;
-use core::state::{GameState, PlayerId, Phase, Orientation};
-use core::ship::ShipType;
-use core::message::Message;
+use transport::ReliableTransport;
+use battleship_core::state::{GameState, PlayerId, Phase, Orientation};
+use battleship_core::ship::ShipType;
+use battleship_core::message::Message;
 use interface_cli::{InputProvider, OutputRenderer, InputEvent};
 use std::io;
 
@@ -14,7 +14,7 @@ pub async fn run_placement<T, I, O>(
     local_id: PlayerId,
 ) -> io::Result<()>
 where
-    T: crate::transport::RawTransport<Error = io::Error> + Send,
+    T: transport::RawTransport + Send,
     I: InputProvider + Send + Sync,
     O: OutputRenderer + Send + Sync,
 {
@@ -42,7 +42,7 @@ where
 }
 
 // Simple in-mem peer for testing:
-pub async fn run_peer<T: crate::transport::RawTransport<Error = io::Error> + Send + 'static>(mut transport: ReliableTransport<T>) {
+pub async fn run_peer<T: transport::RawTransport + Send + 'static>(mut transport: ReliableTransport<T>) {
     let mut state = GameState::new(10,10);
     let local = PlayerId::Two;
     transport.recv().await.unwrap(); // handshake
