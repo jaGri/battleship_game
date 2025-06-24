@@ -23,6 +23,12 @@ pub struct Board {
     guessed: HashSet<(usize, usize)>,
 }
 
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 // /// Represents the current state of a board, including ship positions,
 // /// guesses, hits, misses, and game state information.
 // pub struct BoardState {
@@ -76,7 +82,7 @@ impl Board {
         Self {
             gridsize: GRID_SIZE,
             fleet: Fleet::new(),
-            coordinates: coordinates,
+            coordinates,
             guessed: HashSet::with_capacity(GRID_SIZE * GRID_SIZE),
         }
     }
@@ -167,7 +173,7 @@ impl Board {
         coords: &HashSet<(usize, usize)>,
         invalid_coords: &HashSet<(usize, usize)>,
     ) -> bool {
-        coords.is_subset(&self.coordinates) && coords.is_disjoint(&invalid_coords)
+        coords.is_subset(&self.coordinates) && coords.is_disjoint(invalid_coords)
     }
 
     /// Attempts to place a ship on the board.
@@ -270,7 +276,7 @@ impl Board {
     pub fn random_guess(&mut self) -> Result<GuessResult, GuessError> {
         let mut rng = thread_rng();
         let unguessed = self.unguessed();
-        if unguessed.len() == 0 {
+        if unguessed.is_empty() {
             return Err(GuessError::NoValidCoordinates);
         }
         match unguessed.iter().choose(&mut rng) {

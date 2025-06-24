@@ -1,3 +1,10 @@
+#![allow(
+    dead_code,
+    clippy::doc_overindented_list_items,
+    clippy::needless_range_loop,
+    clippy::useless_conversion
+)]
+
 use async_trait::async_trait;
 use battleship_common::BoardView;
 use battleship_core::{Board, GuessResult};

@@ -7,8 +7,8 @@ use crate::GuessResult;
 use battleship_config::SHIPS;
 
 use crate::constants::GameplayError::ShipNotFound;
-use crate::GuessResult::{Hit, Miss, Sunk};
 use crate::ship::Ship;
+use crate::GuessResult::{Hit, Miss, Sunk};
 
 use array_init::array_init;
 
@@ -19,6 +19,12 @@ use array_init::array_init;
 pub struct Fleet {
     /// Array of all ships in the fleet
     ships: [Ship; SHIPS.len()],
+}
+
+impl Default for Fleet {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Fleet {
