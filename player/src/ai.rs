@@ -1,6 +1,6 @@
 use async_trait::async_trait;
-use core::state::{GameState, PlayerId};
-use core::probability::{ProbabilityEngine, ProbabilityGrid};
+use battleship_core::state::{GameState, PlayerId};
+use battleship_core::probability::{ProbabilityEngine, ProbabilityGrid};
 use crate::Move;
 
 #[derive(Clone, Copy)]

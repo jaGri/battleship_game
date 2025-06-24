@@ -6,12 +6,12 @@ use tokio::net::TcpListener;
 use tokio::io;
 use std::path::Path;
 
-use core::{GameState, PlayerId, Phase};
-use core::message::Message;
+use battleship_core::{GameState, PlayerId, Phase};
+use battleship_core::message::Message;
 use transport::{RawTransport, ReliableTransport};
 use transport::adapters::{InMemTransport, TcpTransport, BtleTransport};
 use persistence::JsonPersistence;
-use interface_cli::CliInterface;
+use interface_cli::{CliInterface, OutputRenderer};
 use player::{Player, HumanPlayer, AiPlayer, ProbAi, Difficulty, Move};
 
 #[tokio::main]
@@ -58,18 +58,16 @@ async fn main() -> io::Result<()> {
     debug!("Config: mode={}, addr={:?}, buffer={}, width={}, height={}, layout={:?}",
         mode, addr, buffer, width, height, layout_path);
 
-    let mut state = if let Some(path) = layout_path {
-        core::layout::ShipLayout::apply
-    GameState::from_file(path, width, height).unwrap_or_else(|_| GameState::new(width, height))
-    } else {
-        GameState::new(width, height)
-    };
+    let mut state = GameState::new(width, height);
+    if let Some(_path) = layout_path {
+        // Layout loading not implemented in this stub
+    }
 
     let local_id: PlayerId;
-    let raw: Box<dyn RawTransport<Error = io::Error> + Send> = match mode {
+    let raw: Box<dyn RawTransport + Send> = match mode {
         "inmem" => {
             let (t1, t2) = InMemTransport::pair(buffer);
-            tokio::spawn(placement::run_peer(t2));
+            tokio::spawn(placement::run_peer(ReliableTransport::new(t2)));
             local_id = PlayerId::One;
             Box::new(t1)
         }
@@ -94,6 +92,7 @@ async fn main() -> io::Result<()> {
     let persistence = JsonPersistence;
     let save_path = Path::new("savegame.json");
     let mut cli = CliInterface::new();
+    let mut cli_out = cli.clone();
     let mut player: Box<dyn Player + Send> = if matches.is_present("ai") {
         Box::new(ProbAi::new(width, height, Difficulty::Medium, local_id))
     } else {
@@ -105,7 +104,7 @@ async fn main() -> io::Result<()> {
         info!("Handshake: {:?} <-> {:?}", local_id, peer);
     }
 
-    placement::run_placement(&mut transport, &mut cli, &mut cli, &mut state, local_id).await?;
+    placement::run_placement(&mut transport, &mut cli, &mut cli_out, &mut state, local_id).await?;
 
     while !state.is_game_over() {
         cli.render_state(&state).await?;
