@@ -1,7 +1,7 @@
 use async_trait::async_trait;
-use core::state::GameState;
-use core::message::Message;
-use crate::state::Orientation;
+use battleship_core::GameState;
+use battleship_core::message::Message;
+use battleship_core::Orientation;
 use std::io::{self, Write};
 
 #[async_trait]
